@@ -16,7 +16,7 @@ using namespace std;
 int assemble(char* filename);
 int isBlank(char* line);
 int comment_start(char* line);
-int getLabel(char* line, char* label);
+int getLabel(char* line, char* label, int line_num);
 int getInstruction(int pos, char* line, char* outline);
 int constructRegInstr(char* instr, char* line, char* outline);
 int constructImmInstr(char* instr, char* line, char* outline);
@@ -49,6 +49,7 @@ int assemble(char* filename) {
 		
 		// first pass for the labels
 		char* line = (char*)malloc(MAX_IN_LINE_LENGTH);
+		int line_num = 0;
 		while(fgets(line, MAX_IN_LINE_LENGTH, infile) != NULL) {
 			int commentPos = comment_start(line);
 			if (isBlank(line) || commentPos == 1) {
@@ -57,13 +58,14 @@ int assemble(char* filename) {
 
 			// check for label
 			char *label;
-			int pos = getLabel(line, label);
+			int pos = getLabel(line, label, line_num);
+			line_num++;
 		}
 
 		rewind(infile);
 
 		// second pass for the instructions
-		int i = 1;
+		line_num = 0;
 		while (fgets(line, MAX_IN_LINE_LENGTH, infile) != NULL) {
 			int commentPos = comment_start(line);
 			if (isBlank(line) || commentPos == 1) {
@@ -73,19 +75,19 @@ int assemble(char* filename) {
 			char* outline = (char*)malloc(MAX_OUT_LINE_LENGTH);
 
 			// check for label
-			int pos = getLabel(line, NULL);
+			int pos = getLabel(line, NULL, line_num);
 
 			// check the instruction type
 			pos = getInstruction(pos, line + pos, outline);
 			if (pos == -1) {
-				printf("ERROR at line %d\n\n", i);
+				printf("ERROR at line %d\n\n", line_num + 1);
 			}
 			
 			// Make sure to output in ASCII
 			fprintf(outfile, "%s\n", outline);
 
 			free(outline);
-			i++;
+			line_num++;
 		}
 	
 		free(line);
@@ -119,7 +121,7 @@ int comment_start(char* line) {
 
 // returns the position after the label
 // store the label to the label_map if
-int getLabel(char* line, char* label) {
+int getLabel(char* line, char* label, int line_num) {
 	int pos = 0;
 
 	char *colon;
@@ -129,7 +131,9 @@ int getLabel(char* line, char* label) {
 		pos = colon - line + 1;
 		if (label != NULL) {
 			label = strtok(line, " :");
-			label_map[label] = "0";
+			char lines[10];
+			sprintf(lines, "%d", line_num * 4);
+			label_map[label] = lines;
 		}
 	}
 
@@ -159,7 +163,7 @@ int getInstruction(int pos, char* line, char* outline) {
 	} else if (strcmp(instr, "addi") == 0 || strcmp(instr, "slti") == 0 || strcmp(instr, "andi") == 0 ||
 			strcmp(instr, "ori") == 0 || strcmp(instr, "xori") == 0 || strcmp(instr, "lui") == 0 ||
 			strcmp(instr, "lw") == 0 || strcmp(instr, "lb") == 0 || strcmp(instr, "sw") == 0 ||
-			strcmp(instr, "sb") == 0 /*|| strcmp(instr, "beq") == 0 || strcmp(instr, "bne") == 0*/) {
+			strcmp(instr, "sb") == 0 || strcmp(instr, "beq") == 0 || strcmp(instr, "bne") == 0) {
 
 		constructImmInstr(instr, pass, outline);
 
@@ -291,8 +295,12 @@ int constructImmInstr(char* instr, char* line, char* outline) {
 		strcpy(opcode, "101000"); // 28_hex
 	} else if (strcmp(instr, "beq") == 0) {
 		strcpy(opcode, "000100"); // 4_hex
+		// the immediate value needs to be converted from a label name
+		strcpy(imm, label_map[imm].c_str());
 	} else if (strcmp(instr, "bne") == 0) {
 		strcpy(opcode, "000101"); // 5_hex
+		// the immediate value needs to be converted from a label name
+		strcpy(imm, label_map[imm].c_str());
 	} else {
 		printf("Invalid instruction: %s\n", instr);
 		return -1;
