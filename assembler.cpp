@@ -20,6 +20,7 @@ int getLabel(char* line, char* label, int line_num);
 int getInstruction(int pos, char* line, char* outline);
 int constructRegInstr(char* instr, char* line, char* outline);
 int constructImmInstr(char* instr, char* line, char* outline);
+int constructJumpInstr(char* instr, char* line, char* outline);
 string convertFunct(char* funct);
 string convertReg(char* reg);
 string convertImm(char* imm);
@@ -45,7 +46,10 @@ int assemble(char* filename) {
 	// Parse line by line and write to file
 	if (infile != NULL) {
 		FILE *outfile;
-		outfile = fopen("machine_code.txt", "w");
+		char* no_ext = strtok(filename, ".");
+		char outfile_name[strlen(no_ext) + 4];
+		sprintf(outfile_name, "%s.txt", no_ext);
+		outfile = fopen(outfile_name, "w");
 		
 		// first pass for the labels
 		char* line = (char*)malloc(MAX_IN_LINE_LENGTH);
@@ -53,6 +57,7 @@ int assemble(char* filename) {
 		while(fgets(line, MAX_IN_LINE_LENGTH, infile) != NULL) {
 			int commentPos = comment_start(line);
 			if (isBlank(line) || commentPos == 1) {
+				line_num++;
 				continue;
 			}
 
@@ -67,8 +72,9 @@ int assemble(char* filename) {
 		// second pass for the instructions
 		line_num = 0;
 		while (fgets(line, MAX_IN_LINE_LENGTH, infile) != NULL) {
-			int commentPos = comment_start(line);
-			if (isBlank(line) || commentPos == 1) {
+			// int commentPos = comment_start(line);
+			if (isBlank(line) || comment_start(line)) {
+				line_num++;
 				continue;
 			}
 
@@ -108,15 +114,15 @@ int isBlank(char* line) {
 }
 
 int comment_start(char* line) {
-	int pos = -1;
-	char *comment;
-	comment = strchr(line, '#');
-
-	if (comment != NULL) {
-		pos = comment - line + 1;
+	int i = 0;
+	while (i < strlen(line) && isspace(line[i])) {
+		i++;
 	}
-
-	return pos;
+	if (i >= strlen(line) || line[i] != '#') {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
 // returns the position after the label
@@ -168,9 +174,10 @@ int getInstruction(int pos, char* line, char* outline) {
 		constructImmInstr(instr, pass, outline);
 
 	} else if (strcmp(instr, "j") == 0 || strcmp(instr, "jal") == 0) {
-
+		constructJumpInstr(instr, pass, outline);
 	} else {
 		printf("Invalid Instruction: %s\n", instr);
+		printf("Full Line: %s\n", orig_line);
 		return -1;
 	}
 
@@ -313,6 +320,35 @@ int constructImmInstr(char* instr, char* line, char* outline) {
 	strcat(outline, convertImm(imm).c_str());
 
 	// printf("%s\n", outline);
+
+	return ret;
+}
+
+int constructJumpInstr(char* instr, char* line, char* outline) {
+	if (instr == NULL || line == NULL || outline == NULL) {
+		printf("Inavlid NULL line\n");
+		return -1;
+	}
+	int ret = 0;
+
+	// get the address label
+	char* addr;
+	addr = strtok(line, " \t");
+	strcpy(addr, label_map[addr].c_str());
+
+	char opcode[6];
+	if (strcmp(instr, "j") == 0) {
+		strcpy(opcode, "000010"); // 2_hex
+	} else if (strcmp(instr, "jal") == 0) {
+		strcpy(opcode, "000011"); // 3_hex
+	} else {
+		printf("Invalid instruction: %s\n", instr);
+		return -1;
+	}
+
+	// Copy the info into the line that will get written
+	strcpy(outline, opcode);
+	strcat(outline, convertAddr(addr).c_str());
 
 	return ret;
 }
