@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <bitset>
 
 #define MAX_IN_LINE_LENGTH 150
 #define MAX_OUT_LINE_LENGTH 32
@@ -16,17 +17,11 @@ int assemble(char* filename);
 int isBlank(char* line);
 int comment_start(char* line);
 int getLabel(char* line, char* label);
-// Instruction_Format getInstrFormat(char* instr);
 int getInstruction(int pos, char* line, char* outline);
 int constructImmInstr(char* instr, char* line, char* outline);
-int getRegisters(int pos, char* line, char* outline);
-
-// enum class Instruction_Format {
-// 	R,
-// 	I,
-// 	J,
-// 	Unknown
-// };
+string convertReg(char* reg);
+string convertImm(char* imm);
+string convertAddr(char* addr);
 
 map<string, string> label_map;
 
@@ -83,7 +78,7 @@ int assemble(char* filename) {
 			pos = getInstruction(pos, line + pos, outline);
 			
 			// Make sure to output in ASCII
-			fprintf(outfile, "%s", line);
+			fprintf(outfile, "%s\n", outline);
 
 			free(outline);
 		}
@@ -136,25 +131,6 @@ int getLabel(char* line, char* label) {
 	return pos;
 }
 
-// Instruction_Format getInstrFormat(char* instr) {
-// 	if (strcmp(instr, "add") || strcmp(instr, "sub") || strcmp(instr, "mult") ||
-// 		strcmp(instr, "div") || strcmp(instr, "slt") || strcmp(instr, "and") ||
-// 		strcmp(instr, "or") || strcmp(instr, "nor") || strcmp(instr, "xor") ||
-// 		strcmp(instr, "mfhi") || strcmp(instr, "mflo") || strcmp(instr, "sll") ||
-// 		strcmp(instr, "srl") || strcmp(instr, "sra") || strcmp(instr, "jr")) {
-// 		return R;
-// 	} else if (strcmp(instr, "addi") || strcmp(instr, "slti") || strcmp(instr, "andi") ||
-// 			strcmp(instr, "ori") || strcmp(instr, "xori") || strcmp(instr, "lui") ||
-// 			strcmp(instr, "lw") || strcmp(instr, "lb") || strcmp(instr, "sw") ||
-// 			strcmp(instr, "sb") || strcmp(instr, "beq") || strcmp(instr, "bne")) {
-// 		return I;
-// 	} else if (strcmp(instr, "j") || strcmp(instr, "jal")) {
-// 		return J;
-// 	} else {
-// 		return Unknown;
-// 	}
-// }
-
 int getInstruction(int pos, char* line, char* outline) {
 	int ret = 0;
 
@@ -164,11 +140,9 @@ int getInstruction(int pos, char* line, char* outline) {
 	int length = strlen(instr);
 	ret = pos + length;
 
-	// check instruction format
-	// Instruction_Format format = getInstrFormat(instr);
-
 	// printf("%s\n", instr);
 	// printf("%s\n", line);
+	strcpy(outline, "\n");
 
 	if (strcmp(instr, "addi") == 0) {
 		constructImmInstr(instr, orig_line + length + 1, outline);
@@ -177,6 +151,12 @@ int getInstruction(int pos, char* line, char* outline) {
 
 	return ret;
 
+}
+
+int constructRegInstr(char* instr, char* line, char* outline) {
+	int ret = 0;
+
+	return ret;
 }
 
 int constructImmInstr(char* instr, char* line, char* outline) {
@@ -191,19 +171,36 @@ int constructImmInstr(char* instr, char* line, char* outline) {
 	char* imm;
 	imm = strtok(NULL, " ,\t");
 
-	if (strcmp(instr, "addi")) {
-		char opcode[6];
+	char opcode[6];
+	if (strcmp(instr, "addi") == 0) {
 		strcpy(opcode, "001000"); // 8_hex
-
 	}
+
+	// Copy the info into the line that will get written
+	strcpy(outline, opcode);
+	strcat(outline, convertReg(registers[1]).c_str());
+	strcat(outline, convertReg(registers[0]).c_str());
+	strcat(outline, convertImm(imm).c_str());
+
+	// printf("%s\n", outline);
 
 	return ret;
 }
 
-int getRegisters(int pos, char* line, char* outline) {
-	int ret = 0;
-	// while (!isalpha(line[pos])) {
-	// 	pos++;
-	// }
-	return ret;
+string convertReg(char* reg) {
+	int num = atoi(reg);
+	string binary = bitset<5>(num).to_string();
+	return binary;
+}
+
+string convertImm(char* imm) {
+	int num = atoi(imm);
+	string binary = bitset<16>(num).to_string();
+	return binary;
+}
+
+string convertAddr(char* addr) {
+	int num = atoi(addr);
+	string binary = bitset<26>(num).to_string();
+	return binary;
 }
