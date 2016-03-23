@@ -72,7 +72,6 @@ int assemble(char* filename) {
 		// second pass for the instructions
 		line_num = 0;
 		while (fgets(line, MAX_IN_LINE_LENGTH, infile) != NULL) {
-			// int commentPos = comment_start(line);
 			if (isBlank(line) || comment_start(line)) {
 				line_num++;
 				continue;
@@ -152,29 +151,28 @@ int getInstruction(int pos, char* line, char* outline) {
 	char orig_line[strlen(line)];
 	strcpy(orig_line, line);
 	char *instr = strtok(line, " \t");
+	char* instrStart = strstr(orig_line, instr);
+
 	int length = strlen(instr);
-	ret = pos + length;
 
 	strcpy(outline, "\n");
-	char pass[strlen(orig_line + length + 1)];
-	strcpy(pass, orig_line + length + 1);
 	if (strcmp(instr, "add") == 0 || strcmp(instr, "sub") == 0 || strcmp(instr, "mult") == 0 ||
 		strcmp(instr, "div") == 0 || strcmp(instr, "slt") == 0 || strcmp(instr, "and") == 0 ||
 		strcmp(instr, "or") == 0 || strcmp(instr, "nor") == 0 || strcmp(instr, "xor") == 0 ||
 		strcmp(instr, "mfhi") == 0 || strcmp(instr, "mflo") == 0 || strcmp(instr, "sll") == 0 ||
 		strcmp(instr, "srl") == 0 || strcmp(instr, "sra") == 0 || strcmp(instr, "jr") == 0) {
 
-		constructRegInstr(instr, pass, outline);
+		ret = constructRegInstr(instr, instrStart + length, outline);
 
 	} else if (strcmp(instr, "addi") == 0 || strcmp(instr, "slti") == 0 || strcmp(instr, "andi") == 0 ||
 			strcmp(instr, "ori") == 0 || strcmp(instr, "xori") == 0 || strcmp(instr, "lui") == 0 ||
 			strcmp(instr, "lw") == 0 || strcmp(instr, "lb") == 0 || strcmp(instr, "sw") == 0 ||
 			strcmp(instr, "sb") == 0 || strcmp(instr, "beq") == 0 || strcmp(instr, "bne") == 0) {
 
-		constructImmInstr(instr, pass, outline);
+		ret = constructImmInstr(instr, instrStart + length, outline);
 
 	} else if (strcmp(instr, "j") == 0 || strcmp(instr, "jal") == 0) {
-		constructJumpInstr(instr, pass, outline);
+		ret = constructJumpInstr(instr, instrStart + length, outline);
 	} else {
 		printf("Invalid Instruction: %s\n", instr);
 		printf("Full Line: %s\n", orig_line);
@@ -190,8 +188,6 @@ int constructRegInstr(char* instr, char* line, char* outline) {
 		printf("Invalid NULL line\n");
 		return -1;
 	}
-
-	int ret = 0;
 
 	// get registers
 	char* registers[3];
@@ -211,8 +207,12 @@ int constructRegInstr(char* instr, char* line, char* outline) {
 		strcpy(funct, "100010"); // 22_hex
 	} else if (strcmp(instr, "mult") == 0) {
 		strcpy(funct, "011000"); // 18_hex
+		// only 2 operands
+		strcpy(registers[0], "000000");
 	} else if (strcmp(instr, "div") == 0) {
 		strcpy(funct, "011010"); // 1a_hex
+		// only 2 operands
+		strcpy(registers[0], "000000");
 	} else if (strcmp(instr, "slt") == 0) {
 		strcpy(funct, "101010"); // 2a_hex
 	} else if (strcmp(instr, "and") == 0) {
@@ -225,25 +225,41 @@ int constructRegInstr(char* instr, char* line, char* outline) {
 		strcpy(funct, "100110"); // 26_hex
 	} else if (strcmp(instr, "mfhi") == 0) {
 		strcpy(funct, "010000"); // 10_hex
+		// There's only 1 operand
+		strcpy(registers[1], "00000");
+		strcpy(registers[2], "00000");
 	} else if (strcmp(instr, "mflo") == 0) {
 		strcpy(funct, "010010"); // 12_hex
+		// There's only 1 operand
+		strcpy(registers[1], "00000");
+		strcpy(registers[2], "00000");
 	} else if (strcmp(instr, "sll") == 0) {
 		strcpy(funct, "000000"); // 00_hex
-		// shamt is the 3rd operand: overwrite the register value
+		// shamt is the 3rd operand
+		// the format is instr $d, $t, shamt
 		strcpy(shamt, registers[2]);
-		strcpy(registers[2], "00000");
+		strcpy(registers[2], registers[1]);
+		strcpy(registers[1], "00000");
 	} else if (strcmp(instr, "srl") == 0) {
 		strcpy(funct, "000010"); // 02_hex
-		// shamt is the 3rd operand: overwrite the register value
+		// shamt is the 3rd operand
+		// the format is instr $d, $t, shamt
 		strcpy(shamt, registers[2]);
-		strcpy(registers[2], "00000");
+		strcpy(registers[2], registers[1]);
+		strcpy(registers[1], "00000");
 	} else if (strcmp(instr, "sra") == 0) {
 		strcpy(funct, "000011"); // 03_hex
-		// shamt is the 3rd operand: overwrite the register value
+		// shamt is the 3rd operand
+		// the format is instr $d, $t, shamt
 		strcpy(shamt, registers[2]);
-		strcpy(registers[2], "00000");
+		strcpy(registers[2], registers[1]);
+		strcpy(registers[1], "00000");
 	} else if (strcmp(instr, "jr") == 0) {
 		strcpy(funct, "001000"); // 08_hex
+		// There is only one operand
+		strcpy(registers[1], registers[0]);
+		strcpy(registers[0], "00000");
+		strcpy(registers[2], "00000");
 	} else {
 		printf("Invalid instruction: %s\n", instr);
 		return -1;
@@ -259,27 +275,38 @@ int constructRegInstr(char* instr, char* line, char* outline) {
 	strcat(outline, convertReg(shamt).c_str()); // shamt
 	strcat(outline, convertFunct(funct).c_str()); // funct
 
-	return ret;
+	return 0;
 }
 
 int constructImmInstr(char* instr, char* line, char* outline) {
 	if (instr == NULL || line == NULL || outline == NULL) {
-		printf("Inavlid NULL line\n");
+		printf("Invalid NULL line\n");
 		return -1;
 	}
 
-	int ret = 0;
-
-	// get registers
 	char* registers[2];
-	registers[0] = strtok(line, " $,\t"); // $rt
-	registers[1] = strtok(NULL, " $,\t"); // $rs
-
-	// get immediate field
 	char* imm;
-	imm = strtok(NULL, " ,\t");
-
 	char opcode[6];
+
+	// memory instructions have a different syntax of instr $t, offset($s)
+	if (strcmp(instr, "lw") == 0 || strcmp(instr, "sw") == 0 ||
+		strcmp(instr, "lb") == 0 || strcmp(instr, "sb") == 0) {
+
+		// get registers
+		registers[0] = strtok(line, " $,\t"); // $rt
+		// get immediate field
+		imm = strtok(NULL, " (,\t");
+		registers[1] = strtok(NULL, " $(),\t"); // $rs
+	} else {
+		// get registers
+		registers[0] = strtok(line, " $,\t"); // $rt
+		registers[1] = strtok(NULL, " $,\t"); // $rs
+
+		// get immediate field
+		imm = strtok(NULL, " ,\t");
+	}
+
+	// set the opcode
 	if (strcmp(instr, "addi") == 0) {
 		strcpy(opcode, "001000"); // 8_hex
 	} else if (strcmp(instr, "slti") == 0) {
@@ -292,6 +319,9 @@ int constructImmInstr(char* instr, char* line, char* outline) {
 		strcpy(opcode, "001110"); // e_hex
 	} else if (strcmp(instr, "lui") == 0) {
 		strcpy(opcode, "001111"); // f_hex
+		// only 2 operands
+		strcpy(imm, registers[1]);
+		strcpy(registers[1], "00000");
 	} else if (strcmp(instr, "lw") == 0) {
 		strcpy(opcode, "100011"); // 23_hex
 	} else if (strcmp(instr, "lb") == 0) {
@@ -303,10 +333,18 @@ int constructImmInstr(char* instr, char* line, char* outline) {
 	} else if (strcmp(instr, "beq") == 0) {
 		strcpy(opcode, "000100"); // 4_hex
 		// the immediate value needs to be converted from a label name
+		if (label_map.find(imm) == label_map.end()) {
+			printf("Invalid label: %s\n", imm);
+			return -1;
+		}
 		strcpy(imm, label_map[imm].c_str());
 	} else if (strcmp(instr, "bne") == 0) {
 		strcpy(opcode, "000101"); // 5_hex
 		// the immediate value needs to be converted from a label name
+		if (label_map.find(imm) == label_map.end()) {
+			printf("Invalid label: %s\n", imm);
+			return -1;
+		}
 		strcpy(imm, label_map[imm].c_str());
 	} else {
 		printf("Invalid instruction: %s\n", instr);
@@ -319,23 +357,26 @@ int constructImmInstr(char* instr, char* line, char* outline) {
 	strcat(outline, convertReg(registers[0]).c_str()); // rt
 	strcat(outline, convertImm(imm).c_str());
 
-	// printf("%s\n", outline);
-
-	return ret;
+	return 0;
 }
 
 int constructJumpInstr(char* instr, char* line, char* outline) {
 	if (instr == NULL || line == NULL || outline == NULL) {
-		printf("Inavlid NULL line\n");
+		printf("Invalid NULL line\n");
 		return -1;
 	}
 	int ret = 0;
 
 	// get the address label
 	char* addr;
-	addr = strtok(line, " \t");
+	addr = strtok(line, " \t\n");
+	if (label_map.find(addr) == label_map.end()) {
+		printf("Invalid label: %s\n", addr);
+		return -1;
+	}
 	strcpy(addr, label_map[addr].c_str());
 
+	// set the opcode
 	char opcode[6];
 	if (strcmp(instr, "j") == 0) {
 		strcpy(opcode, "000010"); // 2_hex
