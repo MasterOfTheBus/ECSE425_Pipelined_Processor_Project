@@ -1,4 +1,4 @@
----- arithmetic logic unit for 32 bit input
+---- arithmetic unit for 32 bit input
 -- Authors: Sheng Hao Liu  260585377
 --
 -- This will do simple arithmetics
@@ -9,7 +9,7 @@ Library ieee;
 Use ieee.std_logic_1164.all;
 
 -- 32 bit instruction input
--- 32 bit instruction output
+-- 32 bit arithmetic result output
 entity arithClass is
   port (
     wordinstruction: in std_logic_vector(31 downto 0);
