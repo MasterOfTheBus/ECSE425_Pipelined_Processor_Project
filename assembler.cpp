@@ -22,8 +22,8 @@ int constructRegInstr(char* instr, char* line, char* outline);
 int constructImmInstr(char* instr, char* line, char* outline);
 int constructJumpInstr(char* instr, char* line, char* outline);
 string convertFunct(char* funct);
-string convertReg(char* reg);
-string convertImm(char* imm);
+string convertReg(string reg);
+string convertImm(string imm);
 string convertAddr(char* addr);
 
 map<string, string> label_map;
@@ -135,7 +135,7 @@ int getLabel(char* line, char* label, int line_num) {
 	if (colon != NULL) {
 		pos = colon - line + 1;
 		if (label != NULL) {
-			label = strtok(line, " :");
+			label = strtok(line, " :\t");
 			char lines[10];
 			sprintf(lines, "%d", line_num * 4);
 			label_map[label] = lines;
@@ -190,14 +190,16 @@ int constructRegInstr(char* instr, char* line, char* outline) {
 	}
 
 	// get registers
-	char* registers[3];
-	registers[0] = strtok(line, " $,\t"); // $rd
-	registers[1] = strtok(NULL, " $,\t"); // $rs
-	registers[2] = strtok(NULL, " $,\t"); // $rt
+	string rd = strtok(line, " $,\t"); // $rd
+	char* temp_rs = strtok(NULL, " #$,\t"); // $rs
+	string rs = "00000";
+	if (temp_rs != NULL) rs = temp_rs;
+	char* temp_rt = strtok(NULL, " #$,\t"); // $rt
+	string rt = "00000";
+	if (temp_rt != NULL) rt = temp_rt;
 
 	// shift amount - only applicable for srl, sra and sll
-	char shamt[5];
-	strcpy(shamt, "00000");
+	string shamt = "00000";
 
 	// function field
 	char funct[6];
@@ -208,11 +210,11 @@ int constructRegInstr(char* instr, char* line, char* outline) {
 	} else if (strcmp(instr, "mult") == 0) {
 		strcpy(funct, "011000"); // 18_hex
 		// only 2 operands
-		strcpy(registers[0], "000000");
+		rd = "000000";
 	} else if (strcmp(instr, "div") == 0) {
 		strcpy(funct, "011010"); // 1a_hex
 		// only 2 operands
-		strcpy(registers[0], "000000");
+		rd = "000000";
 	} else if (strcmp(instr, "slt") == 0) {
 		strcpy(funct, "101010"); // 2a_hex
 	} else if (strcmp(instr, "and") == 0) {
@@ -226,40 +228,40 @@ int constructRegInstr(char* instr, char* line, char* outline) {
 	} else if (strcmp(instr, "mfhi") == 0) {
 		strcpy(funct, "010000"); // 10_hex
 		// There's only 1 operand
-		strcpy(registers[1], "00000");
-		strcpy(registers[2], "00000");
+		rs = "00000";
+		rt = "00000";
 	} else if (strcmp(instr, "mflo") == 0) {
 		strcpy(funct, "010010"); // 12_hex
 		// There's only 1 operand
-		strcpy(registers[1], "00000");
-		strcpy(registers[2], "00000");
+		rs = "00000";
+		rt = "00000";
 	} else if (strcmp(instr, "sll") == 0) {
 		strcpy(funct, "000000"); // 00_hex
 		// shamt is the 3rd operand
 		// the format is instr $d, $t, shamt
-		strcpy(shamt, registers[2]);
-		strcpy(registers[2], registers[1]);
-		strcpy(registers[1], "00000");
+		shamt = rt;
+		rt = rs;
+		rs = "00000";
 	} else if (strcmp(instr, "srl") == 0) {
 		strcpy(funct, "000010"); // 02_hex
 		// shamt is the 3rd operand
 		// the format is instr $d, $t, shamt
-		strcpy(shamt, registers[2]);
-		strcpy(registers[2], registers[1]);
-		strcpy(registers[1], "00000");
+		shamt = rt;
+		rt = rs;
+		rs = "00000";
 	} else if (strcmp(instr, "sra") == 0) {
 		strcpy(funct, "000011"); // 03_hex
 		// shamt is the 3rd operand
 		// the format is instr $d, $t, shamt
-		strcpy(shamt, registers[2]);
-		strcpy(registers[2], registers[1]);
-		strcpy(registers[1], "00000");
+		shamt = rt;
+		rt = rs;
+		rs = "00000";
 	} else if (strcmp(instr, "jr") == 0) {
 		strcpy(funct, "001000"); // 08_hex
 		// There is only one operand
-		strcpy(registers[1], registers[0]);
-		strcpy(registers[0], "00000");
-		strcpy(registers[2], "00000");
+		rs = rd;
+		rd = "00000";
+		rt = "00000";
 	} else {
 		printf("Invalid instruction: %s\n", instr);
 		return -1;
@@ -269,9 +271,9 @@ int constructRegInstr(char* instr, char* line, char* outline) {
 	char opcode[6];
 	strcpy(opcode, "000000");
 	strcpy(outline, opcode);
-	strcat(outline, convertReg(registers[1]).c_str()); // rs
-	strcat(outline, convertReg(registers[2]).c_str()); // rt
-	strcat(outline, convertReg(registers[0]).c_str()); // rd
+	strcat(outline, convertReg(rs).c_str()); // rs
+	strcat(outline, convertReg(rt).c_str()); // rt
+	strcat(outline, convertReg(rd).c_str()); // rd
 	strcat(outline, convertReg(shamt).c_str()); // shamt
 	strcat(outline, convertFunct(funct).c_str()); // funct
 
@@ -284,26 +286,38 @@ int constructImmInstr(char* instr, char* line, char* outline) {
 		return -1;
 	}
 
-	char* registers[2];
-	char* imm;
+	// char* registers[2];
+	// char* imm;
 	char opcode[6];
+
+	string rt, rs, imm;
 
 	// memory instructions have a different syntax of instr $t, offset($s)
 	if (strcmp(instr, "lw") == 0 || strcmp(instr, "sw") == 0 ||
 		strcmp(instr, "lb") == 0 || strcmp(instr, "sb") == 0) {
 
-		// get registers
-		registers[0] = strtok(line, " $,\t"); // $rt
+		// get rt
+		rt = strtok(line, " $,\t"); // $rt
 		// get immediate field
-		imm = strtok(NULL, " (,\t");
-		registers[1] = strtok(NULL, " $(),\t"); // $rs
+		char* temp = strtok(NULL, " (,\t\n");
+		imm = "0";
+		if (temp != NULL) imm = temp;
+
+		// get rs
+		temp = strtok(NULL, " $()#,\t\n"); // $rs
+		rs = "00000";
+		if (temp != NULL) rs = temp;
 	} else {
 		// get registers
-		registers[0] = strtok(line, " $,\t"); // $rt
-		registers[1] = strtok(NULL, " $,\t"); // $rs
+		rt = strtok(line, " $,\t");
+		char* temp = strtok(NULL, " $,\t\n");
+		rs = "00000";
+		if (temp != NULL) rs = temp;
 
 		// get immediate field
-		imm = strtok(NULL, " ,\t");
+		temp = strtok(NULL, " #,\t\n");
+		imm = "0";
+		if (temp != NULL) imm = temp;
 	}
 
 	// set the opcode
@@ -320,8 +334,8 @@ int constructImmInstr(char* instr, char* line, char* outline) {
 	} else if (strcmp(instr, "lui") == 0) {
 		strcpy(opcode, "001111"); // f_hex
 		// only 2 operands
-		strcpy(imm, registers[1]);
-		strcpy(registers[1], "00000");
+		imm = rs;
+		rs = "00000";
 	} else if (strcmp(instr, "lw") == 0) {
 		strcpy(opcode, "100011"); // 23_hex
 	} else if (strcmp(instr, "lb") == 0) {
@@ -334,18 +348,18 @@ int constructImmInstr(char* instr, char* line, char* outline) {
 		strcpy(opcode, "000100"); // 4_hex
 		// the immediate value needs to be converted from a label name
 		if (label_map.find(imm) == label_map.end()) {
-			printf("Invalid label: %s\n", imm);
+			cout << "Invalid label: " << imm << endl;
 			return -1;
 		}
-		strcpy(imm, label_map[imm].c_str());
+		imm = label_map[imm];
 	} else if (strcmp(instr, "bne") == 0) {
 		strcpy(opcode, "000101"); // 5_hex
 		// the immediate value needs to be converted from a label name
 		if (label_map.find(imm) == label_map.end()) {
-			printf("Invalid label: %s\n", imm);
+			cout << "Invalid label: " << imm << endl;
 			return -1;
 		}
-		strcpy(imm, label_map[imm].c_str());
+		imm = label_map[imm];
 	} else {
 		printf("Invalid instruction: %s\n", instr);
 		return -1;
@@ -353,8 +367,8 @@ int constructImmInstr(char* instr, char* line, char* outline) {
 
 	// Copy the info into the line that will get written
 	strcpy(outline, opcode);
-	strcat(outline, convertReg(registers[1]).c_str()); // rs
-	strcat(outline, convertReg(registers[0]).c_str()); // rt
+	strcat(outline, convertReg(rs).c_str()); // rs
+	strcat(outline, convertReg(rt).c_str()); // rt
 	strcat(outline, convertImm(imm).c_str());
 
 	return 0;
@@ -368,8 +382,7 @@ int constructJumpInstr(char* instr, char* line, char* outline) {
 	int ret = 0;
 
 	// get the address label
-	char* addr;
-	addr = strtok(line, " \t\n");
+	char* addr = strtok(line, " #\t\n");
 	if (label_map.find(addr) == label_map.end()) {
 		printf("Invalid label: %s\n", addr);
 		return -1;
@@ -400,14 +413,14 @@ string convertFunct(char* funct) {
 	return binary;
 }
 
-string convertReg(char* reg) {
-	int num = atoi(reg);
+string convertReg(string reg) {
+	int num = atoi(reg.c_str());
 	string binary = bitset<5>(num).to_string();
 	return binary;
 }
 
-string convertImm(char* imm) {
-	int num = atoi(imm);
+string convertImm(string imm) {
+	int num = atoi(imm.c_str());
 	string binary = bitset<16>(num).to_string();
 	return binary;
 }
