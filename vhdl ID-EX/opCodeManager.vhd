@@ -11,10 +11,13 @@ Use ieee.std_logic_1164.all;
 -- 32 bit instruction input
 -- 3 bit "type" output
 -- 2 bit format output
+-- opCodeXXXX for debug, can ignore when wiring everything
 entity opCodeManager is
   port (
     wordinstruction: in std_logic_vector(31 downto 0);
     wordclass: out std_logic_vector(2 downto 0);
+    opCodeWord: out std_logic_vector(5 downto 0);
+    opCodeFunc: out std_logic_vector(5 downto 0);
     wordformat: out std_logic_vector(1 downto 0)
   );
 end entity;
@@ -22,8 +25,8 @@ end entity;
 architecture behavior of opCodeManager is
   -- SIGNALS
   -- intermediate signal for opcode instruction itself
-  SIGNAL opCodeWord: std_logic_vector(5 downto 0);
-  SIGNAL opCodeFunc: std_logic_vector(5 downto 0);
+  SIGNAL opCodeWordi: std_logic_vector(5 downto 0);
+  SIGNAL opCodeFunci: std_logic_vector(5 downto 0);
   
   -- types: Arith, Logic, Transfer, Shift, Mem, Cont.Flow in order 1-6
   -- 0 = no type/error, 7 = maybe other case
@@ -32,74 +35,75 @@ architecture behavior of opCodeManager is
   -- 0 = no type/error
   SIGNAL opCodeFormat: std_logic_vector(1 downto 0);
   
+  -- signal concatonation for easier select statements
+  SIGNAL opCodeConcat: std_logic_vector(4 downto 0);
+  
   begin
-    -- try to keep ID at 1 cycle  
-    process (wordinstruction)
-      begin
-        -- op code
-        opCodeWord <= wordinstruction (31 downto 26);
-        
-        -- know if op code or function
-        if (opCodeWord = "000000") then
-          opCodeFunc <= wordinstruction (5 downto 0);
-        else 
-          opCodeFunc <= "XXXXXX";
-        end if;
-        
-        -- decoding of the 32 bit signal
-        
-        case opCodeWord is
-          -- arith signals (1)
-          when "001000" => opCodeType <= "001"; opCodeFormat <= "10";
-          when "001010" => opCodeType <= "001"; opCodeFormat <= "10";
-          -- logical signals (2)
-          when "001100" => opCodeType <= "010"; opCodeFormat <= "10";
-          when "001101" => opCodeType <= "010"; opCodeFormat <= "10";
-          when "001110" => opCodeType <= "010"; opCodeFormat <= "10";
-          -- transfer signals (3)
-          when "001111" => opCodeType <= "011"; opCodeFormat <= "10";
-          -- shift signals (4)
-          -- memory signals (5)
-          when "100011" => opCodeType <= "101"; opCodeFormat <= "10";
-          when "100000" => opCodeType <= "101"; opCodeFormat <= "10";
-          when "101011" => opCodeType <= "101"; opCodeFormat <= "10";
-          when "101000" => opCodeType <= "101"; opCodeFormat <= "10";
-          -- control flow signals (6)
-          when "000100" => opCodeType <= "110"; opCodeFormat <= "10";
-          when "000101" => opCodeType <= "110"; opCodeFormat <= "10";
-          when "000010" => opCodeType <= "110"; opCodeFormat <= "11";
-          when "000011" => opCodeType <= "110"; opCodeFormat <= "11";
-          -- no type / error
-          when OTHERS => opCodeType <= "000"; opCodeFormat <= "00";
-        end case;
-        
-        case opCodeFunc is
-          -- arith signals (1)
-          when "100000" => opCodeType <= "001"; opCodeFormat <= "01";
-          when "100010" => opCodeType <= "001"; opCodeFormat <= "01";
-          when "011000" => opCodeType <= "001"; opCodeFormat <= "01";
-          when "011010" => opCodeType <= "001"; opCodeFormat <= "01";
-          when "101010" => opCodeType <= "001"; opCodeFormat <= "01";
-          -- logical signals (2)
-          when "100100" => opCodeType <= "010"; opCodeFormat <= "01";
-          when "100101" => opCodeType <= "010"; opCodeFormat <= "01";
-          when "100111" => opCodeType <= "010"; opCodeFormat <= "01";
-          when "100110" => opCodeType <= "010"; opCodeFormat <= "01";
-          -- transfer signals (3)
-          when "010000" => opCodeType <= "011"; opCodeFormat <= "01";
-          when "010010" => opCodeType <= "011"; opCodeFormat <= "01";
-          -- shift signals (4)
-          when "000000" => opCodeType <= "100"; opCodeFormat <= "01";
-          when "000010" => opCodeType <= "100"; opCodeFormat <= "01";
-          when "000011" => opCodeType <= "100"; opCodeFormat <= "01";
-          -- memory signals (5)
-          -- control flow signals (6)
-          when "001000" => opCodeType <= "110"; opCodeFormat <= "01";
-          -- no type / error  
-          when OTHERS => opCodeType <= "000"; opCodeFormat <= "00";
-        end case;
-    end process;
+    -- this code will now only be combinational circuits
+    -- i.e. it will not take any clock cycles to give an output
+      
+    -- op code
+    opCodeWordi <= wordinstruction (31 downto 26);        
+    opCodeFunci <= wordinstruction (5 downto 0);   
     
+    -- signal assignment in one huge when/else statement (no clk cycles needed)
+    opCodeConcat <= 
+      -- funct usage
+      -- arith (1)
+      "00101" when (opCodeWordi = "000000") and (opCodeFunci = "100000") else
+      "00101" when (opCodeWordi = "000000") and (opCodeFunci = "100010") else
+      "00101" when (opCodeWordi = "000000") and (opCodeFunci = "011000") else
+      "00101" when (opCodeWordi = "000000") and (opCodeFunci = "011010") else
+      "00101" when (opCodeWordi = "000000") and (opCodeFunci = "101010") else
+      -- logical (2)
+      "01001" when (opCodeWordi = "000000") and (opCodeFunci = "100100") else
+      "01001" when (opCodeWordi = "000000") and (opCodeFunci = "100101") else
+      "01001" when (opCodeWordi = "000000") and (opCodeFunci = "100111") else
+      "01001" when (opCodeWordi = "000000") and (opCodeFunci = "100110") else
+      -- transfer (3)
+      "01101" when (opCodeWordi = "000000") and (opCodeFunci = "010000") else
+      "01101" when (opCodeWordi = "000000") and (opCodeFunci = "010010") else
+      -- shift (4)
+      "10001" when (opCodeWordi = "000000") and (opCodeFunci = "000000") else
+      "10001" when (opCodeWordi = "000000") and (opCodeFunci = "000010") else
+      "10001" when (opCodeWordi = "000000") and (opCodeFunci = "000011") else
+      -- memory (5)
+      -- control (6)
+      "11001" when (opCodeWordi = "000000") and (opCodeFunci = "001000") else
+      
+      -- opcode usage
+      -- arith (1)   
+      "00110" when (opCodeWordi = "001000") else
+      "00110" when (opCodeWordi = "001010") else
+      -- logical (2)
+      "01010" when (opCodeWordi = "001100") else
+      "01010" when (opCodeWordi = "001101") else
+      "01010" when (opCodeWordi = "001110") else
+      -- transfer (3)
+      "01110" when (opCodeWordi = "001111") else
+      -- shift (4)
+      -- memory (5)
+      "10110" when (opCodeWordi = "100011") else
+      "10110" when (opCodeWordi = "100000") else
+      "10110" when (opCodeWordi = "101011") else
+      "10110" when (opCodeWordi = "101000") else
+      -- control (6)
+      "11010" when (opCodeWordi = "000100") else
+      "11010" when (opCodeWordi = "000101") else
+      "11011" when (opCodeWordi = "000010") else
+      "11011" when (opCodeWordi = "000011") else
+            
+      "00000";      
+      
+    -- unconcatonate for op class/format
+    opCodeType <= opCodeConcat (4 downto 2);
+    opCodeFormat <= opCodeConcat (1 downto 0);
+    
+    -- intermediate signals for debug
+    opCodeWord <= opCodeWordi;        
+    opCodeFunc <= opCodeFunci;        
+    
+    -- output        
     wordclass <= opCodeType;
-    wordformat <= opCodeFormat;
+    wordformat <= opCodeFormat;  
 end behavior;
