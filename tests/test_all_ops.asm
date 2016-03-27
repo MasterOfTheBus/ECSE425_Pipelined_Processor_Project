@@ -31,6 +31,9 @@ label1:		xor $9, $2, $11
 			sb $9, 8($9)
 			beq $3, $14, label1
 			bne $2, $10, label2
+			asrt $3, $5
+			asrti $6, -99
+			halt
 			j End
 
 End:	beq $12, $12, End
