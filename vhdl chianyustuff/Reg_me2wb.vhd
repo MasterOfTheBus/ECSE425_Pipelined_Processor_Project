@@ -6,13 +6,13 @@ ENTITY Reg_me2wb IS
 		clk, reset	: IN std_logic;
 		me_WB		: IN std_logic_vector(1 DOWNTO 0);
 		me_ReadData	: IN std_logic_vector(31 DOWNTO 0);
-		me_Addr		: IN std_logic_vector(4 DOWNTO 0);
+		me_Addr		: IN std_logic_vector(31 DOWNTO 0);
 		me_WriteReg	: IN std_logic_vector(4 DOWNTO 0);
 		
 		wb_WB		: OUT std_logic_vector(1 DOWNTO 0);
 		wb_ReadData	: OUT std_logic_vector(31 DOWNTO 0);
-		wb_Addr		: OUT std_logic_vector(4 DOWNTO 0);
-		wb_WriteReg	: OUT std_logic_vector(4 DOWNTO 0);
+		wb_Addr		: OUT std_logic_vector(31 DOWNTO 0);
+		wb_WriteReg	: OUT std_logic_vector(4 DOWNTO 0)
 		);
 END ENTITY;
 

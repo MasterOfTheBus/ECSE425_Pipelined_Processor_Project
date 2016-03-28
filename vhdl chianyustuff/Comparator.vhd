@@ -5,7 +5,7 @@ ENTITY Comparator IS
 	PORT(	
 		A		: IN std_logic_vector(31 downto 0);
 		B		: IN std_logic_vector(31 downto 0);
-		equal	: OUT std_logic;
+		equal	: OUT std_logic
 		);
 END Comparator;
 

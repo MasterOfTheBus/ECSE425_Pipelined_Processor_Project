@@ -1,5 +1,7 @@
 LIBRARY IEEE; 
-USE IEEE.std_logic_1164.ALL; 
+USE IEEE.std_logic_1164.ALL;
+USE ieee.std_logic_unsigned.ALL;
+USE ieee.numeric_std.ALL;
 
 ENTITY reg_file IS 
 	PORT (

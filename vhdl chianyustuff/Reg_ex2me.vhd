@@ -6,15 +6,15 @@ ENTITY Reg_ex2me IS
 		clk, reset		: IN std_logic;
 		ex_ME			: IN std_logic_vector(2 DOWNTO 0);
 		ex_WB           : IN std_logic_vector(1 DOWNTO 0);
-		ex_Addr         : IN std_logic_vector(4 DOWNTO 0);
+		ex_Addr         : IN std_logic_vector(31 DOWNTO 0);
 		ex_WriteData	: IN std_logic_vector(31 DOWNTO 0);
 		ex_WriteReg     : IN std_logic_vector(4 DOWNTO 0);
 		
 		me_ME			: OUT std_logic_vector(2 DOWNTO 0);
 		me_WB			: OUT std_logic_vector(1 DOWNTO 0);
-		me_Addr			: OUT std_logic_vector(4 DOWNTO 0);
+		me_Addr			: OUT std_logic_vector(31 DOWNTO 0);
 		me_WriteData	: OUT std_logic_vector(31 DOWNTO 0);
-		me_WriteReg		: OUT std_logic_vector(4 DOWNTO 0);
+		me_WriteReg		: OUT std_logic_vector(4 DOWNTO 0)
 	);
 END ENTITY;
 

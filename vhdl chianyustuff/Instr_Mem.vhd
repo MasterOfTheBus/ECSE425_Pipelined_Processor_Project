@@ -23,9 +23,9 @@ ARCHITECTURE behavior OF Instr_Mem IS
 			tempInstr <= (OTHERS => '0');
 		ELSIF rising_edge(clk) THEN 
 			-- write the output of the memory into the instruction register 
-			IF(IRWrite = '1') THEN 
+
 				tempInstr <= ReadAddr;
-			END IF; 
+
 		END IF; 
 		Instr <= tempInstr;
 		Instr_31_26 <= tempInstr(31 DOWNTO 26);

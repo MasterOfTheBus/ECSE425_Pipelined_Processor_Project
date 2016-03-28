@@ -16,6 +16,7 @@ ARCHITECTURE behavior OF ID_ForwardUnit IS
 	-- Forwards the result from 2nd previous instruction to either input of the compare
 	BEGIN
 		PROCESS(ctrl_Branch)
+		BEGIN
 			IF (ctrl_Branch = '1') THEN
 				IF(me_RegisterRd /= "00000" AND me_RegisterRd = id_RegisterRs) THEN
 					ForwardC <= '1';

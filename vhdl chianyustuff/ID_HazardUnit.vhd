@@ -18,6 +18,7 @@ END ENTITY;
 ARCHITECTURE behavior OF ID_HazardUnit IS
 	BEGIN
 		PROCESS (ex_MemRead)
+			BEGIN
 			-- Check if instruction in the EX stage now is a lw
 			IF (ex_MemRead = '1') THEN
 				-- Check if destination register of lw matches either source registers of the instruction in ID

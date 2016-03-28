@@ -1,21 +1,21 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 
-ENTITY ALUController
+ENTITY ALUController IS
 	PORT(	
 		opcode		: IN std_logic_vector(5 DOWNTO 0);
 		
 		-- EX Stage
-		RegDst		: IN std_logic;
-		ALUOp		: IN std_logic_vector(1 DOWNTO 0);
-		ALUSrc		: IN std_logic;
+		RegDst		: OUT std_logic;
+		ALUOp		: OUT std_logic_vector(1 DOWNTO 0);
+		ALUSrc		: OUT std_logic;
 		-- MEM Stage
-		Branch		: IN std_logic;
-		MemRead		: IN std_logic;
-		MemWrite	: IN std_logic;
+		Branch		: OUT std_logic;
+		MemRead		: OUT std_logic;
+		MemWrite	: OUT std_logic;
 		-- WB Stage
-		RegWrite	: IN std_logic;
-		MemtoReg	: IN std_logic;
+		RegWrite	: OUT std_logic;
+		MemtoReg	: OUT std_logic
 	);
 	END ENTITY;
 	
@@ -25,19 +25,18 @@ BEGIN
 	PROCESS(opcode) 
 		BEGIN
 		CASE opcode IS
-			WHEN "000000" => Control_vector <= "100100010"; -- R-type
-            WHEN "100011" => Control_vector <= "011110000"; -- lw
-            WHEN "101011" => Control_vector <= "010001000"; -- sw
-            WHEN "000100" => Control_vector <= "000000101"; -- beq
+			WHEN "000000" => ctrl_matrix <= "100100010"; -- R-type
+            WHEN "100011" => ctrl_matrix <= "011110000"; -- lw
+            WHEN "101011" => ctrl_matrix <= "010001000"; -- sw
+            WHEN "000100" => ctrl_matrix <= "000000101"; -- beq
             
-			-- WHEN "001000" => Control_vector <= "011000000"; -- addi
-            -- WHEN "000010" => Control_vector <= "000000100"; -- j
-            -- WHEN "000011" => Control_vector <= "001000001"; -- jal
-            -- WHEN "001001" => Control_vector <= "011000001"; -- subi
-            WHEN OTHERS   => Control_vector <= "---------";
+			-- WHEN "001000" => ctrl_matrix <= "011000000"; -- addi
+            -- WHEN "000010" => ctrl_matrix <= "000000100"; -- j
+            -- WHEN "000011" => ctrl_matrix <= "001000001"; -- jal
+            -- WHEN "001001" => ctrl_matrix <= "011000001"; -- subi
+            WHEN OTHERS   => ctrl_matrix <= "---------";
 		END CASE;
-	END PROCESS;
-	
+		
 	RegDst		<= ctrl_matrix(8);
 	ALUSrc		<= ctrl_matrix(7);
 	MemtoReg	<= ctrl_matrix(6);
@@ -46,4 +45,5 @@ BEGIN
 	MemRead		<= ctrl_matrix(3);
 	Branch		<= ctrl_matrix(2);
 	ALUOp		<= ctrl_matrix(1 DOWNTO 0);
+	END PROCESS;	
 END behavior;
