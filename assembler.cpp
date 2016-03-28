@@ -23,7 +23,7 @@ int constructRegInstr(char* instr, char* line, char* outline);
 int constructImmInstr(char* instr, char* line, char* outline, int line_num);
 int constructJumpInstr(char* instr, char* line, char* outline);
 int constructTestInstr(char* instr, char* line, char* outline);
-string convertFunct(char* funct);
+string calculateLabelImm(string imm, int line_num);
 string convertReg(string reg);
 string convertImm(string imm);
 string convertAddr(char* addr);
@@ -59,7 +59,6 @@ int assemble(char* filename) {
 		while(fgets(line, MAX_IN_LINE_LENGTH, infile) != NULL) {
 			int commentPos = comment_start(line);
 			if (isBlank(line) || commentPos == 1) {
-				line_num++;
 				continue;
 			}
 
@@ -73,9 +72,9 @@ int assemble(char* filename) {
 
 		// second pass for the instructions
 		line_num = 0;
+		int literal_line_num = 0;
 		while (fgets(line, MAX_IN_LINE_LENGTH, infile) != NULL) {
 			if (isBlank(line) || comment_start(line)) {
-				line_num++;
 				continue;
 			}
 
@@ -87,7 +86,7 @@ int assemble(char* filename) {
 			// check the instruction type
 			pos = getInstruction(pos, line + pos, outline, line_num);
 			if (pos == -1) {
-				printf("ERROR at line %d\n\n", line_num + 1);
+				printf("ERROR at line %d\n\n", literal_line_num + 1);
 			}
 			
 			// Make sure to output in ASCII
@@ -218,10 +217,14 @@ int constructRegInstr(char* instr, char* line, char* outline) {
 	} else if (strcmp(instr, "mult") == 0) {
 		strcpy(funct, "011000"); // 18_hex
 		// only 2 operands
+		rt = rs;
+		rs = rd;
 		rd = "000000";
 	} else if (strcmp(instr, "div") == 0) {
 		strcpy(funct, "011010"); // 1a_hex
 		// only 2 operands
+		rt = rs;
+		rs = rd;
 		rd = "000000";
 	} else if (strcmp(instr, "slt") == 0) {
 		strcpy(funct, "101010"); // 2a_hex
@@ -281,7 +284,7 @@ int constructRegInstr(char* instr, char* line, char* outline) {
 	strcat(outline, convertReg(rt).c_str()); // rt
 	strcat(outline, convertReg(rd).c_str()); // rd
 	strcat(outline, convertReg(shamt).c_str()); // shamt
-	strcat(outline, convertFunct(funct).c_str()); // funct
+	strcat(outline, funct); // funct
 
 	return 0;
 }
@@ -357,10 +360,10 @@ int constructImmInstr(char* instr, char* line, char* outline, int line_num) {
 			cout << "Invalid label: " << imm << endl;
 			return -1;
 		}
-		int target = atoi(label_map[imm].c_str());
-		stringstream ss;
-		ss << target - line_num - 1;
-		imm = ss.str();
+		imm = calculateLabelImm(imm, line_num);
+		string temp = rs;
+		rs = rt;
+		rt = temp;
 	} else if (strcmp(instr, "bne") == 0) {
 		strcpy(opcode, "000101"); // 5_hex
 		// the immediate value needs to be converted from a label name
@@ -368,10 +371,10 @@ int constructImmInstr(char* instr, char* line, char* outline, int line_num) {
 			cout << "Invalid label: " << imm << endl;
 			return -1;
 		}
-		int target = atoi(label_map[imm].c_str());
-		stringstream ss;
-		ss << target - line_num - 1;
-		imm = ss.str();
+		imm = calculateLabelImm(imm, line_num);
+		string temp = rs;
+		rs = rt;
+		rt = temp;
 	} else {
 		printf("Invalid instruction: %s\n", instr);
 		return -1;
@@ -431,8 +434,8 @@ int constructTestInstr(char* instr, char* line, char* outline) {
 		string rs = "00000";
 		if (temp_rs != NULL) rs = temp_rs;
 		strcpy(outline, "010100");
-		strcat(outline, convertReg(rt).c_str());
 		strcat(outline, convertReg(rs).c_str());
+		strcat(outline, convertReg(rt).c_str());
 		strcat(outline, "0000000000000000");
 	} else if (strcmp(instr, "asrti") == 0) {
 		string rt = strtok(line, " $,\t");
@@ -452,10 +455,11 @@ int constructTestInstr(char* instr, char* line, char* outline) {
 	return 0;
 }
 
-string convertFunct(char* funct) {
-	int num = atoi(funct);
-	string binary = bitset<6>(num).to_string();
-	return binary;
+string calculateLabelImm(string imm, int line_num) {
+	int target = atoi(label_map[imm].c_str());
+	stringstream ss;
+	ss << (target - (line_num * 4) - 4) / 4;
+	return ss.str();
 }
 
 string convertReg(string reg) {
@@ -472,6 +476,6 @@ string convertImm(string imm) {
 
 string convertAddr(char* addr) {
 	int num = atoi(addr);
-	string binary = bitset<26>(num).to_string();
+	string binary = bitset<26>(num / 4).to_string();
 	return binary;
 }
