@@ -2,7 +2,7 @@
 -- Authors: Sheng Hao Liu  260585377
 --
 -- This will work similar to an array
--- can only input into 1 registry at a time
+-- can only input into 1 registry at a time (Rd/Rt)
 -- can read from all registry elements at the same time
 
 Library ieee;
@@ -16,6 +16,7 @@ USE ieee.numeric_std.ALL;
 entity decoderReg is
   port(
     CLK: in std_logic;
+    WR_EN: in std_logic;
     regIndex: in std_logic_vector(4 downto 0);
     regElementIn: in std_logic_vector(31 downto 0);
     regElement0Out: out std_logic_vector(31 downto 0);
@@ -64,9 +65,9 @@ architecture behavior of decoderReg is
   begin
     IND <= to_integer(unsigned(regIndex)); 
 
-    process(CLK, regElementIn, IND)
+    process(CLK, regElementIn, IND, WR_EN)
       begin
-        if (rising_edge(CLK)) then 
+        if (rising_edge(CLK) and WR_EN = '1') then 
              if (IND = 0) then
             REG(0) <= regElementIn;
           elsif (IND = 1) then

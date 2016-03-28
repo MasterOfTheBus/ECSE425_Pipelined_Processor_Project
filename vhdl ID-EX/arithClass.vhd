@@ -8,11 +8,10 @@
 Library ieee;
 Use ieee.std_logic_1164.all;
 
--- 32 bit instruction input
+-- 32 bit instruction input decoded into RS/T/D + Shamt + funct + immediate + address (not used here)
 -- 32 bit arithmetic result output
 entity arithClass is
   port (
-    wordinstruction: in std_logic_vector(31 downto 0);
     wordformat: in std_logic_vector(1 downto 0);
     wordoutput: out std_logic_vector(31 downto 0)
   );
@@ -20,6 +19,8 @@ end entity;
 
 architecture behavior of arithClass is 
   -- SIGNALS
+  -- check if add is over 32 bits (33rd bit - front, 1 = overflow)
+  SIGNAL INTADD: std_logic_vector (32 downto 0);
   begin
     
 end behavior;

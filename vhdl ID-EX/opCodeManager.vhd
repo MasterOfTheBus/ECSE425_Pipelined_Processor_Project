@@ -12,13 +12,16 @@ Use ieee.std_logic_1164.all;
 -- 3 bit "type" output
 -- 2 bit format output
 -- opCodeXXXX for debug, can ignore when wiring everything
+-- This controller will also take the shamt along, I don't want to make another component
+
 entity opCodeManager is
   port (
     wordinstruction: in std_logic_vector(31 downto 0);
     wordclass: out std_logic_vector(2 downto 0);
-    opCodeWord: out std_logic_vector(5 downto 0);
-    opCodeFunc: out std_logic_vector(5 downto 0);
-    wordformat: out std_logic_vector(1 downto 0)
+    opCodeWord: out std_logic_vector(5 downto 0); -- can be not used
+    opCodeFunc: out std_logic_vector(5 downto 0); -- can be not used
+    wordformat: out std_logic_vector(1 downto 0);
+    shamt: out std_logic_vector (4 downto 0)
   );
 end entity;
 
@@ -27,6 +30,8 @@ architecture behavior of opCodeManager is
   -- intermediate signal for opcode instruction itself
   SIGNAL opCodeWordi: std_logic_vector(5 downto 0);
   SIGNAL opCodeFunci: std_logic_vector(5 downto 0);
+  -- intermediate signal for shamt
+  SIGNAL Shamtin: std_logic_vector(4 downto 0);
   
   -- types: Arith, Logic, Transfer, Shift, Mem, Cont.Flow in order 1-6
   -- 0 = no type/error, 7 = maybe other case
@@ -42,9 +47,12 @@ architecture behavior of opCodeManager is
     -- this code will now only be combinational circuits
     -- i.e. it will not take any clock cycles to give an output
       
-    -- op code
+    -- op code 6bits
     opCodeWordi <= wordinstruction (31 downto 26);        
     opCodeFunci <= wordinstruction (5 downto 0);   
+    
+    -- shamt 5bits
+    Shamtin <= wordinstruction (10 downto 6) when (opCodeFormat = "01") else "00000";
     
     -- signal assignment in one huge when/else statement (no clk cycles needed)
     opCodeConcat <= 
@@ -93,6 +101,7 @@ architecture behavior of opCodeManager is
       "11011" when (opCodeWordi = "000010") else
       "11011" when (opCodeWordi = "000011") else
             
+      -- error      
       "00000";      
       
     -- unconcatonate for op class/format
@@ -106,4 +115,5 @@ architecture behavior of opCodeManager is
     -- output        
     wordclass <= opCodeType;
     wordformat <= opCodeFormat;  
+    shamt <= Shamtin;
 end behavior;
