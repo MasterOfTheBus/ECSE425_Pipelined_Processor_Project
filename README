@@ -1,0 +1,2 @@
+To compile the assembler just run 'make'.
+To run the assembler run './assembler <assembly file>'
