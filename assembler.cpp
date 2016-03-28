@@ -48,10 +48,7 @@ int assemble(char* filename) {
 	// Parse line by line and write to file
 	if (infile != NULL) {
 		FILE *outfile;
-		char* no_ext = strtok(filename, ".");
-		char outfile_name[strlen(no_ext) + 4];
-		sprintf(outfile_name, "%s.txt", no_ext);
-		outfile = fopen(outfile_name, "w");
+		outfile = fopen("Init.dat", "w");
 		
 		// first pass for the labels
 		char* line = (char*)malloc(MAX_IN_LINE_LENGTH);
