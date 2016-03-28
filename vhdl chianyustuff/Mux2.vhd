@@ -13,10 +13,13 @@ END ENTITY;
 
 ARCHITECTURE behavior OF Mux2 IS
 BEGIN
+	PROCESS(sel)
+	BEGIN
 	CASE sel IS
 		WHEN '0' => output <= input0;
 		WHEN '1' => output <= input1;
 		WHEN OTHERS => output <= (OTHERS => 'X'); 
 	END CASE;
+	END PROCESS;
 END behavior;
 		

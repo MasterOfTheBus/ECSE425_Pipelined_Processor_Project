@@ -3,7 +3,7 @@ USE ieee.std_logic_1164.ALL;
 
 ENTITY datapath IS
 	PORT(
-		clk, reset	: IN std_logic;
+		clk, reset	: IN std_logic
 		);
 END ENTITY;
 	
@@ -30,9 +30,9 @@ ARCHITECTURE behavior OF datapath IS
 		id_ReadData1	: IN std_logic_vector(31 DOWNTO 0);	
 		id_ReadData2	: IN std_logic_vector(31 DOWNTO 0);	
 		id_ext	    	: IN std_logic_vector(31 DOWNTO 0);
-		id_rs	    	: IN std_logic_vector(5 DOWNTO 0);
-		id_rt	    	: IN std_logic_vector(5 DOWNTO 0);
-		id_rd	    	: IN std_logic_vector(5 DOWNTO 0);
+		id_rs	    	: IN std_logic_vector(4 DOWNTO 0);
+		id_rt	    	: IN std_logic_vector(4 DOWNTO 0);
+		id_rd	    	: IN std_logic_vector(4 DOWNTO 0);
 			
 		ex_EX			: OUT std_logic_vector(3 DOWNTO 0);
 		ex_ME			: OUT std_logic_vector(2 DOWNTO 0);
@@ -40,9 +40,10 @@ ARCHITECTURE behavior OF datapath IS
 		ex_ReadData1	: OUT std_logic_vector(31 DOWNTO 0);
 		ex_ReadData2	: OUT std_logic_vector(31 DOWNTO 0);
 		ex_ext			: OUT std_logic_vector(31 DOWNTO 0);
-		ex_rs			: OUT std_logic_vector(5 DOWNTO 0);
-		ex_rt			: OUT std_logic_vector(5 DOWNTO 0);
-		ex_rd			: OUT std_logic_vector(5 DOWNTO 0);
+		ex_rs			: OUT std_logic_vector(4 DOWNTO 0);
+		ex_rt			: OUT std_logic_vector(4 DOWNTO 0);
+		ex_rd			: OUT std_logic_vector(4 DOWNTO 0)
+		);
 	END COMPONENT;
 
 	COMPONENT Reg_ex2me IS
@@ -50,30 +51,30 @@ ARCHITECTURE behavior OF datapath IS
 		clk, reset		: IN std_logic;
 		ex_ME			: IN std_logic_vector(2 DOWNTO 0);
 		ex_WB           : IN std_logic_vector(1 DOWNTO 0);
-		ex_Addr         : IN std_logic_vector(4 DOWNTO 0);
+		ex_ALUResult    : IN std_logic_vector(31 DOWNTO 0);
 		ex_WriteData	: IN std_logic_vector(31 DOWNTO 0);
 		ex_WriteReg     : IN std_logic_vector(4 DOWNTO 0);
 		
 		me_ME			: OUT std_logic_vector(2 DOWNTO 0);
 		me_WB			: OUT std_logic_vector(1 DOWNTO 0);
-		me_Addr			: OUT std_logic_vector(4 DOWNTO 0);
+		me_ALUResult	: OUT std_logic_vector(31 DOWNTO 0);
 		me_WriteData	: OUT std_logic_vector(31 DOWNTO 0);
-		me_WriteReg		: OUT std_logic_vector(4 DOWNTO 0);
+		me_WriteReg		: OUT std_logic_vector(4 DOWNTO 0)
 	);
 	END COMPONENT;
 	
 	COMPONENT Reg_me2wb IS
     PORT (
-		clk, reset	: IN std_logic;
-		me_WB		: IN std_logic_vector(1 DOWNTO 0);
-		me_ReadData	: IN std_logic_vector(31 DOWNTO 0);
-		me_Addr		: IN std_logic_vector(4 DOWNTO 0);
-		me_WriteReg	: IN std_logic_vector(4 DOWNTO 0);
-		
-		wb_WB		: OUT std_logic_vector(1 DOWNTO 0);
-		wb_ReadData	: OUT std_logic_vector(31 DOWNTO 0);
-		wb_Addr		: OUT std_logic_vector(4 DOWNTO 0);
-		wb_WriteReg	: OUT std_logic_vector(4 DOWNTO 0);
+		clk, reset		: IN std_logic;
+		me_WB			: IN std_logic_vector(1 DOWNTO 0);
+		me_ReadData		: IN std_logic_vector(31 DOWNTO 0);
+		me_ALUResult	: IN std_logic_vector(31 DOWNTO 0);
+		me_WriteReg		: IN std_logic_vector(4 DOWNTO 0);
+			
+		wb_WB			: OUT std_logic_vector(1 DOWNTO 0);
+		wb_ReadData		: OUT std_logic_vector(31 DOWNTO 0);
+		wb_ALUResult	: OUT std_logic_vector(31 DOWNTO 0);
+		wb_WriteReg		: OUT std_logic_vector(4 DOWNTO 0)
 		);
 	END COMPONENT;
 
@@ -120,7 +121,7 @@ ARCHITECTURE behavior OF datapath IS
 	END COMPONENT;
 	
 	-- Controllers
-	COMPONENT ALUController
+	COMPONENT InstrController
 	PORT(	
 		opcode		: IN std_logic_vector(5 DOWNTO 0);
 		
@@ -134,7 +135,7 @@ ARCHITECTURE behavior OF datapath IS
 		MemWrite	: IN std_logic;
 		-- WB Stage
 		RegWrite	: IN std_logic;
-		MemtoReg	: IN std_logic;
+		MemtoReg	: IN std_logic
 	);
 	END COMPONENT;
 	
@@ -170,7 +171,7 @@ ARCHITECTURE behavior OF datapath IS
 
 	COMPONENT ShiftL2 IS
 	PORT (
-		A : IN std_logic_vector(15 DOWNTO 0);
+		A : IN std_logic_vector(31 DOWNTO 0);
         Y : OUT std_logic_vector(31 DOWNTO 0)
 		);
 	END COMPONENT;
@@ -194,9 +195,9 @@ ARCHITECTURE behavior OF datapath IS
 	
 	COMPONENT Comparator IS
 	PORT(	
-		A		: IN std_logic_vector(4 downto 0);
-		B		: IN std_logic_vector(4 downto 0);
-		equal	: OUT std_logic;
+		A		: IN std_logic_vector(31 DOWNTO 0);
+		B		: IN std_logic_vector(31 DOWNTO 0);
+		equal	: OUT std_logic
 		);
 	END COMPONENT;
 	
@@ -223,10 +224,42 @@ ARCHITECTURE behavior OF datapath IS
 	); 
 	END COMPONENT; 
 	
+	COMPONENT PC IS 
+	PORT ( 
+		clk 	: IN std_logic; 
+		reset 	: IN std_logic;
+		pc_in 	: IN std_logic_vector(31 DOWNTO 0); 		
+		pc_out 	: OUT std_logic_vector(31 DOWNTO 0)
+		);
+	END COMPONENT;
+	
+	COMPONENT Instr_Mem IS 
+	PORT ( 
+		clk 		: IN std_logic; 
+		reset 		: IN std_logic; 
+		ReadAddr	: IN std_logic_vector(31 DOWNTO 0); 
+		Instr		: OUT std_logic_vector(31 DOWNTO 0); -- whole instruction
+		Instr_31_26 : OUT std_logic_vector(5 DOWNTO 0);	-- opcode	
+		Instr_25_21 : OUT std_logic_vector(4 DOWNTO 0);	-- rs	
+		Instr_20_16 : OUT std_logic_vector(4 DOWNTO 0);	-- rt
+		Instr_15_0 	: OUT std_logic_vector(15 DOWNTO 0)	-- immediate
+		); 
+	END COMPONENT;
+	
+	COMPONENT Data_Mem IS
+	PORT (
+		clk, reset	: IN std_logic;
+		ALUResult	: IN std_logic_vector(31 DOWNTO 0);
+		WriteData	: IN std_logic_vector(31 DOWNTO 0);
+		MemRead, MemWrite	: IN std_logic;
+		ReadData	: OUT std_logic_vector(31 DOWNTO 0)
+	);
+	END COMPONENT;
+	
 	-- Signals
 	-- Constants
-	SIGNAL four32 : std_logic_vector(31 DOWNTO 0) := ""; 
-	SIGNAL zero32 : std_logic_vector(31 DOWNTO 0) := "";
+	SIGNAL four32 : std_logic_vector(31 DOWNTO 0) := "00000000000000000000000000000100"; 
+	SIGNAL zero32 : std_logic_vector(31 DOWNTO 0) := "00000000000000000000000000000000";
 	-- PC
 	SIGNAL pc_prev, pc_curr, pc_add4, pc_addshft : std_logic_vector(31 DOWNTO 0);
 	SIGNAL pc_Write : std_logic;
@@ -243,10 +276,10 @@ ARCHITECTURE behavior OF datapath IS
 	SIGNAL id_rs, id_rt, id_rd : std_logic_vector(4 DOWNTO 0);
 	SIGNAL id_immediate : std_logic_vector(15 DOWNTO 0);
 	
-	SIGNAL id_pc, id_ext, id_shft : std_logic_vector(31 DOWNTO 0);
+	SIGNAL id_pc, id_ext, id_shft, id_instr : std_logic_vector(31 DOWNTO 0);
 	SIGNAL precomp1, precomp2 : std_logic_vector(31 DOWNTO 0);
 	SIGNAL id_equal, id_fwd1, id_fwd2, id_nop : std_logic;
-	SIGNAL id_ReadData1, id_ReadData2, precomp1, precomp2 : std_logic_vector(31 DOWNTO 0);	
+	SIGNAL id_ReadData1, id_ReadData2 : std_logic_vector(31 DOWNTO 0);	
 	
 	SIGNAL id_RegDst, id_ALUSrc, id_Branch, id_MemRead, id_MemWrite, id_RegWrite, id_MemtoReg : std_logic;
 	SIGNAL id_ALUOp : std_logic_vector(1 DOWNTO 0);
@@ -262,21 +295,27 @@ ARCHITECTURE behavior OF datapath IS
 	SIGNAL ex_ReadData1, ex_ReadData2, ex_WriteData : std_logic_vector(31 DOWNTO 0);
 	SIGNAL ex_ext : std_logic_vector(31 DOWNTO 0);
 	SIGNAL ex_rs, ex_rt, ex_rd : std_logic_vector(4 DOWNTO 0);
-	SIGNAL ex_Addr, ex_WriteReg : std_logic_vector(4 DOWNTO 0);
+	SIGNAL ex_ALUResult : std_logic_vector(31 DOWNTO 0);
+	SIGNAL ex_WriteReg : std_logic_vector(4 DOWNTO 0);
+	
+	SIGNAL Funct : std_logic_vector(5 DOWNTO 0);
+	SIGNAL ALUControl: std_logic_vector(3 DOWNTO 0);
 	
 	SIGNAL prealu1, prealu2 : std_logic_vector(31 DOWNTO 0);
 	SIGNAL ex_fwd1, ex_fwd2 : std_logic_vector(1 DOWNTO 0);
 	
 	-- MEM
-	me_ME : std_logic_vector(2 DOWNTO 0);
-	me_WB : std_logic_vector(1 DOWNTO 0);
-	me_ReadData, me_WriteData : std_logic_vector(31 DOWNTO 0);
-	me_Addr, me_WriteReg : std_logic_vector(4 DOWNTO 0);
+	SIGNAL me_ME : std_logic_vector(2 DOWNTO 0);
+	SIGNAL me_WB : std_logic_vector(1 DOWNTO 0);
+	SIGNAL me_ReadData, me_WriteData : std_logic_vector(31 DOWNTO 0);
+	SIGNAL me_ALUResult : std_logic_vector(31 DOWNTO 0);
+	SIGNAL me_WriteReg : std_logic_vector(4 DOWNTO 0);
 	
 	-- WB
-	wb_WB : std_logic_vector(1 DOWNTO 0);
-	wb_Addr, wb_WriteReg : std_logic_vector(4 DOWNTO 0);
-	wb_ReadData, wb_WriteData : std_logic_vector(31 DOWNTO 0);
+	SIGNAL wb_WB : std_logic_vector(1 DOWNTO 0);
+	SIGNAL wb_ALUResult : std_logic_vector(31 DOWNTO 0);
+	SIGNAL wb_WriteReg : std_logic_vector(4 DOWNTO 0);
+	SIGNAL wb_ReadData, wb_WriteData : std_logic_vector(31 DOWNTO 0);
 	
 BEGIN
 	
@@ -286,10 +325,12 @@ BEGIN
 	if_adder : Adder
 		PORT MAP(pc_curr, four32, pc_add4);
 	if_pcmux : Mux2
+		GENERIC MAP (n => 32)
 		PORT MAP(pc_add4, pc_addshft, PCSrc, pc_prev);
 	if_instr_mem : Instr_Mem
-		PORT MAP(clk, if_addr, instr);
+		PORT MAP(clk, reset, if_addr, instr);
 	if_flushmux : Mux2
+		GENERIC MAP (n => 32)
 		PORT MAP(instr, zero32, if_Flush, if_instr);
 	
 	pipeline1 : Reg_if2id
@@ -302,21 +343,23 @@ BEGIN
 	id_opcode		<= id_instr(31 DOWNTO 26);
 	id_rs			<= id_instr(25 DOWNTO 21);
 	id_rt			<= id_instr(20 DOWNTO 16);
-	id_rd			<= id_instr(15 DOWNTO 10);
+	id_rd			<= id_instr(15 DOWNTO 11);
 	id_immediate	<= id_instr(15 DOWNTO 0);
 	
 	id_adder1 : Adder 
 		PORT MAP(id_pc, id_shft, pc_addshft);
-	reg_file : Reg_File
-		PORT MAP(clk, reset, id_rs, id_rt, wb_WriteReg, wb_WriteData, wb_WB(1), id_ReadData1, id_ReadData2); -- wb_RegWrite
+	registerFile : Reg_File
+		PORT MAP(clk, reset, wb_WB(1), id_rs, id_rt, wb_WriteReg, wb_WriteData, id_ReadData1, id_ReadData2); -- wb_RegWrite
 	sign_ext : Sign_Extension
 		PORT MAP(id_immediate, id_ext);
 	shifting : ShiftL2
 		PORT MAP(id_ext, id_shft);
 	id_mux1 : Mux2
-		PORT MAP(id_ReadData1, me_Addr, id_fwd1, precomp1);
+		GENERIC MAP (n => 32)
+		PORT MAP(id_ReadData1, me_ALUResult, id_fwd1, precomp1);
 	id_mux2 : Mux2
-		PORT MAP(id_ReadData2, me_Addr, id_fwd2, precomp2);
+		GENERIC MAP (n => 32)
+		PORT MAP(id_ReadData2, me_ALUResult, id_fwd2, precomp2);
 	compare : Comparator
 		PORT MAP(precomp1, precomp2, id_equal);
 	
@@ -327,7 +370,8 @@ BEGIN
 	ControlLines <= id_RegDst & id_ALUOp & id_ALUSrc & id_Branch & id_MemRead & id_MemWrite & id_RegWrite & id_MemtoReg;	
 	
 	id_controlmux : Mux2
-		PORT MAP(ControlLines, "00000000", id_nop, id_EXMEWB);
+		GENERIC MAP (n => 9)
+		PORT MAP(ControlLines, "000000000", id_nop, id_EXMEWB);
 	
 	forward2 : ID_ForwardUnit
 		PORT MAP(id_Branch, me_WriteReg, id_rs, id_rt, id_fwd1, id_fwd2);
@@ -346,42 +390,47 @@ BEGIN
 	
 	
 	-- EX
-	ex_mux1 : Mux3 
-		PORT MAP(ex_ReadData1, wb_WriteData, me_Addr, ex_fwd1, prealu1);
-	ex_mux2 : Mux3 
-		PORT MAP(ex_ReadData2, wb_WriteData, me_Addr, ex_fwd2, ex_WriteData);
+	ex_mux1 : Mux3
+		GENERIC MAP (n => 32)
+		PORT MAP(ex_ReadData1, wb_WriteData, me_ALUResult, ex_fwd1, prealu1);
+	ex_mux2 : Mux3
+		GENERIC MAP (n => 32)
+		PORT MAP(ex_ReadData2, wb_WriteData, me_ALUResult, ex_fwd2, ex_WriteData);
 	
-	ex_mux3 : Mux2 
+	ex_mux3 : Mux2
+		GENERIC MAP (n => 32)
 		PORT MAP(ex_WriteData, ex_ext, ex_EX(0), prealu2); -- ex_ALUSrc
 	ex_mux4 : Mux2 
+		GENERIC MAP (n => 5)
 		PORT MAP(ex_rt, ex_rd, ex_EX(3), ex_WriteReg); -- ex_RegDst
 	
 	alu_ctrl : ALUController
 		PORT MAP(ex_EX(2 DOWNTO 1), Funct, ALUControl); -- ex_ALUOp
 	ex_alu : ALU 
-		PORT MAP(prealu1, prealu2, ALUControl, ex_Addr);
+		PORT MAP(prealu1, prealu2, ALUControl, ex_ALUResult);
 	
 	forward1 : EX_ForwardUnit
-		PORT MAP(me_WB(1), wb_WB(1), me_WriteReg, wb_rd, ex_rs, ex_rt, ex_fwd1, ex_fwd2); -- me_RegWrite, wb_RegWrite
+		PORT MAP(me_WB(1), wb_WB(1), me_WriteReg, wb_WriteReg, ex_rs, ex_rt, ex_fwd1, ex_fwd2); -- me_RegWrite, wb_RegWrite
 	
 	pipeline3 : Reg_ex2me
 		PORT MAP(clk, reset, 
-			ex_ME, ex_WB, ex_Addr, ex_WriteData, ex_WriteReg,
-			me_ME, me_WB, me_Addr, me_WriteData, me_WriteReg);
+			ex_ME, ex_WB, ex_ALUResult, ex_WriteData, ex_WriteReg,
+			me_ME, me_WB, me_ALUResult, me_WriteData, me_WriteReg);
 	
 	
 	-- MEM
-	memory : data_mem
-		PORT MAP(me_Addr, me_WriteData, me_ME(1), me_ME(0), me_ReadData); -- me_MemRead, me_MemWrite
+	memory : Data_Mem
+		PORT MAP(clk, reset, me_ALUResult, me_WriteData, me_ME(1), me_ME(0), me_ReadData); -- me_MemRead, me_MemWrite
 			
 	pipeline4 : Reg_me2wb
 		PORT MAP(clk, reset, 
-			me_WB, me_ReadData, me_Addr, me_WriteReg, 
-			wb_WB, wb_ReadData, wb_Addr, wb_WriteReg);
+			me_WB, me_ReadData, me_ALUResult, me_WriteReg, 
+			wb_WB, wb_ReadData, wb_ALUResult, wb_WriteReg);
 			
 			
 	-- WB
 	wb_mux1 : Mux2
-		PORT MAP(wb_Addr, wb_ReadData, wb_WB(0), wb_WriteData); -- wb_MemtoReg
+		GENERIC MAP (n => 32)
+		PORT MAP(wb_ALUResult, wb_ReadData, wb_WB(0), wb_WriteData); -- wb_MemtoReg
 	
 END behavior;

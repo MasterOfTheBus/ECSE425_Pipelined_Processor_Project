@@ -18,18 +18,19 @@ ARCHITECTURE behavior OF ALU IS
 		PROCESS(Sel)
 			BEGIN			
 			CASE Sel IS
-				WHEN "0000" => tempRes <= '0' & (SrcA AND SrcB);
-                WHEN "0001" => tempRes <= '0' & (SrcA OR SrcB);
-                WHEN "0010" => tempRes <= ('0' & SrcA) + ('0' & SrcB);
-				WHEN "0110" => tempRes <= '0' & (SrcA - SrcB);
-                -- WHEN "0100" => tempRes <= '0' & (SrcA AND NOT SrcB);
-                -- WHEN "0101" => tempRes <= '0' & (SrcA OR NOT SrcB);
+				WHEN "0000" => tempRes <= '0' & (A AND B);
+                WHEN "0001" => tempRes <= '0' & (A OR B);
+                WHEN "0010" => tempRes <= ('0' & A) + ('0' & B);
+				WHEN "0110" => tempRes <= '0' & (A - B);
+                -- WHEN "0100" => tempRes <= '0' & (A AND NOT B);
+                -- WHEN "0101" => tempRes <= '0' & (A OR NOT B);
 				WHEN "0111" => 
-                    IF (SrcA < SrcB) THEN 
+                    IF (A < B) THEN 
                         tempRes <= "000000000000000000000000000000001"; -- 1
                     ELSE 
                         tempRes <= "000000000000000000000000000000000"; -- 0
                     END IF;
+				WHEN OTHERS => tempRes <= (OTHERS => 'X');
 			END CASE;		
 		END PROCESS;		
 		

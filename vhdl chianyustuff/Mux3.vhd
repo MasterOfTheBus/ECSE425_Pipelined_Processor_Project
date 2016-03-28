@@ -14,11 +14,14 @@ END ENTITY;
 
 ARCHITECTURE behavior OF Mux3 IS
 BEGIN
+	PROCESS(sel)
+	BEGIN
 	CASE sel IS
-		WHEN '00' => output <= input00;
-		WHEN '01' => output <= input01;
-		WHEN '10' => output <= input10;
+		WHEN "00" => output <= input00;
+		WHEN "01" => output <= input01;
+		WHEN "10" => output <= input10;
 		WHEN OTHERS => output <= (OTHERS => 'X'); 
 	END CASE;
+	END PROCESS;
 END behavior;
 		

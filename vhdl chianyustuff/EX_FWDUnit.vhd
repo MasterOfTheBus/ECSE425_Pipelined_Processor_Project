@@ -21,6 +21,7 @@ ARCHITECTURE behavior OF EX_ForwardUnit IS
 	-- ME: forwards the result from the previous or second previous instruction to either input of the ALU	
 	BEGIN
 		PROCESS (me_RegWrite, wb_RegWrite)
+			BEGIN
 			-- EX Forward Unit
 			IF(me_RegWrite = '1') THEN
 				IF((me_RegisterRd /= "00000") AND (me_RegisterRd = ex_RegisterRs)) THEN
@@ -33,10 +34,10 @@ ARCHITECTURE behavior OF EX_ForwardUnit IS
 			
 			-- MEM Forward Unit
 			IF (wb_RegWrite = '1') THEN
-				IF ((wb_RegisterRd /= '0') AND (me_RegisterRd /= ex_RegisterRs) AND (wb_RegisterRd = ex_RegisterRs)) THEN
+				IF ((wb_RegisterRd /= "00000") AND (me_RegisterRd /= ex_RegisterRs) AND (wb_RegisterRd = ex_RegisterRs)) THEN
 					ForwardA <= "01";
 				END IF;
-				IF ((wb_RegisterRd /= '0') AND (me_RegisterRd /= ex_RegisterRt) AND (wb_RegisterRd = ex_RegisterRt)) THEN
+				IF ((wb_RegisterRd /= "00000") AND (me_RegisterRd /= ex_RegisterRt) AND (wb_RegisterRd = ex_RegisterRt)) THEN
 					ForwardB <= "01";
 				END IF;
 			END IF;

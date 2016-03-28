@@ -1,7 +1,7 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 
-ENTITY ALUController
+ENTITY ALUController IS
 	PORT(
 		ALUOp	: IN std_logic_vector(1 DOWNTO 0);
 		Funct	: IN std_logic_vector(5 DOWNTO 0);

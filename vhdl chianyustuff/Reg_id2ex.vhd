@@ -10,9 +10,9 @@ ENTITY Reg_id2ex IS
 		id_ReadData1	: IN std_logic_vector(31 DOWNTO 0);	
 		id_ReadData2	: IN std_logic_vector(31 DOWNTO 0);	
 		id_ext	    	: IN std_logic_vector(31 DOWNTO 0);
-		id_rs	    	: IN std_logic_vector(5 DOWNTO 0);
-		id_rt	    	: IN std_logic_vector(5 DOWNTO 0);
-		id_rd	    	: IN std_logic_vector(5 DOWNTO 0);
+		id_rs	    	: IN std_logic_vector(4 DOWNTO 0);
+		id_rt	    	: IN std_logic_vector(4 DOWNTO 0);
+		id_rd	    	: IN std_logic_vector(4 DOWNTO 0);
 			
 		ex_EX			: OUT std_logic_vector(3 DOWNTO 0);
 		ex_ME			: OUT std_logic_vector(2 DOWNTO 0);
@@ -20,9 +20,10 @@ ENTITY Reg_id2ex IS
 		ex_ReadData1	: OUT std_logic_vector(31 DOWNTO 0);
 		ex_ReadData2	: OUT std_logic_vector(31 DOWNTO 0);
 		ex_ext			: OUT std_logic_vector(31 DOWNTO 0);
-		ex_rs			: OUT std_logic_vector(5 DOWNTO 0);
-		ex_rt			: OUT std_logic_vector(5 DOWNTO 0);
-		ex_rd			: OUT std_logic_vector(5 DOWNTO 0);
+		ex_rs			: OUT std_logic_vector(4 DOWNTO 0);
+		ex_rt			: OUT std_logic_vector(4 DOWNTO 0);
+		ex_rd			: OUT std_logic_vector(4 DOWNTO 0)
+	);
 END ENTITY;
 
 ARCHITECTURE behavior OF Reg_id2ex IS
