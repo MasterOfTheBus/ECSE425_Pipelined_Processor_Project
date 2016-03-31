@@ -1,0 +1,67 @@
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
+
+ENTITY tb_Processor IS
+END tb_Processor;
+
+ARCHITECTURE behavior OF tb_Processor IS
+
+COMPONENT Processor IS 
+	PORT(
+		clk, reset		: IN std_logic;
+		Instruction		: IN std_logic_vector(31 DOWNTO 0);
+		ReadData			: IN std_logic_vector(31 DOWNTO 0);
+		
+		PC			: OUT std_logic_vector(31 DOWNTO 0);
+		ALUOut		: OUT std_logic_vector(31 DOWNTO 0);
+		MemRead		: OUT std_logic;
+		MemWrite		: OUT std_logic;
+		WriteData	: OUT std_logic_vector(31 DOWNTO 0)		
+	);
+END COMPONENT;
+
+-- The input signals with their initial values
+CONSTANT clk_period : time := 1 ns;
+SIGNAL clk : std_logic := '0';
+SIGNAL reset : std_logic := '0';
+SIGNAL pc, instr, data : std_logic_vector(31 DOWNTO 0);
+SIGNAL MemRead, MemWrite : std_logic;
+SIGNAL ALUOut, WriteData : std_logic_vector(31 DOWNTO 0);
+
+BEGIN
+	pro : Processor 
+		PORT MAP (clk, reset, instr, data, pc, ALUOut, MemRead, MemWrite, WriteData);
+
+-- Clock process
+clk_process : PROCESS
+BEGIN
+	clk <= '0';
+	WAIT FOR clk_period/2;
+	clk <= '1';
+	WAIT FOR clk_period/2;
+	END PROCESS;
+
+-- Stimulus process
+stim_process: PROCESS
+BEGIN   
+	
+	reset <= '1';
+	wait for 1 * clk_period; 
+	reset <= '0';
+	wait for 1 * clk_period; 
+	instr <= "10001100001010100000000000010100"; -- lw $10, 20($1)
+	wait for 1 * clk_period; 
+	instr <= "00000000010000110101100000100010"; -- sub $11, $2, $3
+	wait for 1 * clk_period; 
+	instr <= "00000000011001000110000000100000"; -- add $12, $3, $4
+	wait for 1 * clk_period; 
+	instr <= "10001100001011010000000000011000"; -- lw $13, 24($1)
+	wait for 1 * clk_period; 
+	instr <= "00000000101001100111000000100000"; -- add $14, $5, $6
+	wait for 1 * clk_period; 
+
+
+	WAIT;
+END PROCESS stim_process;
+END behavior;

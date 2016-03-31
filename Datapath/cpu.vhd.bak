@@ -1,0 +1,122 @@
+-- This file is a CPU skeleton
+--
+-- entity name: cpu
+
+
+library ieee;
+
+use ieee.std_logic_1164.all; -- allows use of the std_logic_vector type
+use ieee.numeric_std.all; -- allows use of the unsigned type
+use STD.textio.all;
+
+
+--Basic CPU interface.
+--You may add your own signals, but do not remove the ones that are already there.
+ENTITY cpu IS
+   
+   GENERIC (
+      File_Address_Read    : STRING    := "Init.dat";
+      File_Address_Write   : STRING    := "MemCon.dat";
+      Mem_Size_in_Word     : INTEGER   := 256;
+      Read_Delay           : INTEGER   := 0; 
+      Write_Delay          : INTEGER   := 0
+   );
+   PORT (
+      clk:      	      IN    STD_LOGIC;
+      reset:            IN    STD_LOGIC := '0';
+      
+      --Signals required by the MIKA testing suite
+      finished_prog:    OUT   STD_LOGIC; --Set this to '1' when program execution is over
+      assertion:        OUT   STD_LOGIC; --Set this to '1' when an assertion occurs 
+      assertion_pc:     OUT   NATURAL;   --Set the assertion's program counter location
+      
+      mem_dump:         IN    STD_LOGIC := '0'
+   );
+   
+END cpu;
+
+ARCHITECTURE rtl OF cpu IS
+   
+   --Main memory signals
+   SIGNAL mm_address       : NATURAL                                       := 0;
+   SIGNAL mm_word_byte     : std_logic                                     := '0';
+   SIGNAL mm_we            : STD_LOGIC                                     := '0';
+   SIGNAL mm_wr_done       : STD_LOGIC                                     := '0';
+   SIGNAL mm_re            : STD_LOGIC                                     := '0';
+   SIGNAL mm_rd_ready      : STD_LOGIC                                     := '0';
+   SIGNAL mm_data          : STD_LOGIC_VECTOR(31 downto 0)   			   := (OTHERS => 'Z');
+   SIGNAL mm_initialize    : STD_LOGIC                                     := '0';
+	SIGNAL addr1	: in NATURAL;
+	SIGNAL data1	: inout STD_LOGIC_VECTOR(MEM_DATA_WIDTH-1 downto 0);
+	SIGNAL re1		: in STD_LOGIC;
+	SIGNAL we1		: in STD_LOGIC;
+	SIGNAL busy1 	: out STD_LOGIC;
+	
+	
+	SIGNAL addr2	: in NATURAL;
+	SIGNAL data2	: inout STD_LOGIC_VECTOR(MEM_DATA_WIDTH-1 downto 0);
+	SIGNAL re2		: in STD_LOGIC;
+	SIGNAL we2		: in STD_LOGIC;
+	SIGNAL busy2 	: out STD_LOGIC;
+   
+BEGIN
+   
+   --Instantiation of the main memory component
+   main_memory : ENTITY work.Main_Memory
+      GENERIC MAP (
+         File_Address_Read   => File_Address_Read,
+         File_Address_Write  => File_Address_Write,
+         Mem_Size_in_Word    => Mem_Size_in_Word,
+         Read_Delay          => Read_Delay, 
+         Write_Delay         => Write_Delay
+      )
+      PORT MAP (
+         clk         => clk,
+         address     => mm_address,
+         Word_Byte   => mm_word_byte,
+         we          => mm_we,
+         wr_done     => mm_wr_done,
+         re          => mm_re,
+         rd_ready    => mm_rd_ready,
+         data        => mm_data,
+         initialize  => mm_initialize,
+         dump        => mem_dump
+      );
+	  
+	arbiter : memory_arbiter
+	PORT MAP (clk, reset, 
+	mm_address,
+	mm_word_byte,
+	mm_we,
+	mm_wr_done,
+	mm_re,
+	mm_rd_ready,
+	mm_data,
+	mm_initialize,
+	mem_dump,
+	addr1,
+	data1,
+	re1	,
+	we1	,
+	busy1,
+	addr2,
+	data2,
+	re2	,
+	we2	,
+	busy2
+	);
+	
+	
+	pro : processor
+	PORT MAP (clk, reset, 
+		Instruction		=> data1,
+		ReadData		=> data2,
+		
+		PC				=> addr1, 
+		ALUOut			=> addr2,
+		MemRead			=> re2,
+		MemWrite		=> we2,
+		WriteData		=> data2
+		);
+   
+END rtl;

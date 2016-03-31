@@ -1,0 +1,51 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 dC:/Users/Phil/Desktop/mem and wb/EX-MEM Register
+Ereg_ex2mem
+Z1 w1459241168
+Z2 DPx4 ieee 11 numeric_std 0 22 :ASDNFgHXf_ih3J@9F3Ze1
+Z3 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
+Z4 DPx4 ieee 14 std_logic_1164 0 22 eNV`TJ_GofJTzYa?f<@Oe1
+R0
+Z5 8reg_ex2mem.vhd
+Z6 Freg_ex2mem.vhd
+l0
+L6
+VQf_;k?B@W>ma8[NN]Co=U1
+!s100 a@6ICZ3_0aM[VlAl=MWz23
+Z7 OP;C;10.4a;61
+32
+Z8 !s110 1459241237
+!i10b 1
+Z9 !s108 1459241237.000000
+Z10 !s90 -reportprogress|300|reg_ex2mem.vhd|
+Z11 !s107 reg_ex2mem.vhd|
+!i113 1
+o-O0
+Z12 tExplicit 1
+Abehaviour
+R2
+R3
+R4
+DEx4 work 10 reg_ex2mem 0 22 Qf_;k?B@W>ma8[NN]Co=U1
+l33
+L32
+V>C5hL2RB]@9]aB4c[i<D32
+!s100 l^1FJEIomR4DLHG85X?Bb3
+R7
+32
+R8
+!i10b 1
+R9
+R10
+R11
+!i113 1
+o-O0
+R12

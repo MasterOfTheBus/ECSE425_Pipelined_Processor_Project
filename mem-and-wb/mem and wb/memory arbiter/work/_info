@@ -1,0 +1,154 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 dC:/Users/Phil/Desktop/mem and wb/memory arbiter
+Emain_memory
+Z1 w1454733262
+Z2 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
+Z3 DPx4 ieee 14 std_logic_1164 0 22 eNV`TJ_GofJTzYa?f<@Oe1
+R0
+Z4 8Main_Memory.vhd
+Z5 FMain_Memory.vhd
+l0
+L5
+Vo;_>n3nkX[SN>cZc=i<eG2
+!s100 A_CV;KMiU4ED`M9hgXdHI3
+Z6 OP;C;10.4a;61
+32
+Z7 !s110 1459333228
+!i10b 1
+Z8 !s108 1459333227.000000
+Z9 !s90 -reportprogress|300|Main_Memory.vhd|
+Z10 !s107 Main_Memory.vhd|
+!i113 1
+o-O0
+Z11 tExplicit 1
+Abehavioural
+R2
+R3
+Z12 DEx4 work 11 main_memory 0 22 o;_>n3nkX[SN>cZc=i<eG2
+l65
+L29
+Viz]UQ>VUJBPVi:VgSF:BW3
+!s100 ?Y`g6Hi4?WMZ^X;QHS:5X2
+R6
+32
+R7
+!i10b 1
+R8
+R9
+R10
+!i113 1
+o-O0
+R11
+Ememory_arbiter
+Z13 w1459330205
+Z14 DPx4 work 18 memory_arbiter_lib 0 22 U9;3[j1]GSA:GK^lgI4b01
+Z15 DPx4 ieee 11 numeric_std 0 22 :ASDNFgHXf_ih3J@9F3Ze1
+R2
+R3
+R0
+Z16 8memory_arbiter.vhd
+Z17 Fmemory_arbiter.vhd
+l0
+L8
+VzA:2YgGkGTDO]hS=4HP[K3
+!s100 2cc8R?z:L@WcHoH[M57OP1
+R6
+32
+Z18 !s110 1459333321
+!i10b 1
+Z19 !s108 1459333321.000000
+Z20 !s90 -reportprogress|300|memory_arbiter.vhd|
+Z21 !s107 memory_arbiter.vhd|
+!i113 1
+o-O0
+R11
+Abehavioral
+R12
+R14
+R15
+R2
+R3
+DEx4 work 14 memory_arbiter 0 22 zA:2YgGkGTDO]hS=4HP[K3
+l45
+L28
+V7i3F3DHA;kKecWCemHZ[92
+!s100 >e9zeDiY8=eEkSH6@PPzN1
+R6
+32
+R18
+!i10b 1
+R19
+R20
+R21
+!i113 1
+o-O0
+R11
+Pmemory_arbiter_lib
+R15
+R2
+R3
+R1
+R0
+8memory_arbiter_lib.vhd
+Fmemory_arbiter_lib.vhd
+l0
+L6
+VU9;3[j1]GSA:GK^lgI4b01
+!s100 JeYT<LCA@]CX0AU<bYMeI0
+R6
+32
+!s110 1459333310
+!i10b 1
+!s108 1459333310.000000
+!s90 -reportprogress|300|memory_arbiter_lib.vhd|
+!s107 memory_arbiter_lib.vhd|
+!i113 1
+o-O0
+R11
+Ememory_in_byte
+Z22 w1456300581
+R2
+R3
+R0
+Z23 8Memory_in_Byte.vhd
+Z24 FMemory_in_Byte.vhd
+l0
+L5
+Vzm;E3A2LVWl1D@7lUKAYe0
+!s100 jXbBLDeI>Jz91`Od40R<@2
+R6
+32
+Z25 !s110 1459333220
+!i10b 1
+Z26 !s108 1459333219.000000
+Z27 !s90 -reportprogress|300|Memory_in_Byte.vhd|
+Z28 !s107 Memory_in_Byte.vhd|
+!i113 1
+o-O0
+R11
+Abehavioural
+R2
+R3
+DEx4 work 14 memory_in_byte 0 22 zm;E3A2LVWl1D@7lUKAYe0
+l33
+L29
+V`CIQ]]XCMIe0DTz7VnjhX3
+!s100 [eJ=L2WSB:ZMP_QLeki433
+R6
+32
+R25
+!i10b 1
+R26
+R27
+R28
+!i113 1
+o-O0
+R11
