@@ -3,13 +3,14 @@
 --
 -- This file is the ID part of the pipeline (whole thing)
 -- This controller with take everything and output all to execution
--- 4 inputs: CLK, Write Enable, Registry Index, Instruction
+-- 5 inputs: CLK, Write Enable, Registry Index, Instruction, ElementIn (for a registry)
 -- 10 outputs: Elements of RS/T/D, Exec Class, OpCode, Funct, Format RIJ, Shamt, Immediate, Address
+-- 3 outputs: index of RS/T/D for WB/MEM
 -- Some outputs will be 0s depending on instruction given
 -- Error checking:
 -- If Class = 0 or 7, then error
 -- If Format = 0, then error
--- If RS/T/D = "Z", then error in indexing
+-- If Element RS/T/D = "Z", then error in indexing
 -- If immediate/address = "Z" when the format is correct, then error
 -- If regIndex = 32 somehow, then error
 
@@ -28,17 +29,17 @@ entity insDec is
     regElementRD: out std_logic_vector(31 downto 0); 
     -- opCodeManager
     wordinstruction: in std_logic_vector(31 downto 0);
-    wordclass: out std_logic_vector(2 downto 0);
-    opCodeWord: out std_logic_vector(5 downto 0); -- give opcode to exec
-    opCodeFunc: out std_logic_vector(5 downto 0); -- give funct to exec
+    wordclass: out std_logic_vector(2 downto 0); -- give to the EXEC total
+    opcode: out std_logic_vector(5 downto 0); -- give opcode to exec
+    funct: out std_logic_vector(5 downto 0); -- give funct to exec
     wordformat: out std_logic_vector(1 downto 0); -- give format RIJ to exec
     shamt: out std_logic_vector (4 downto 0); -- give shamt to exec
     -- registryManager
     -- wordinstruction: in std_logic_vector(31 downto 0); -- already there
     -- wordformat: in std_logic_vector (1 downto 0); -- already there
-    --regRD: out std_logic_vector (4 downto 0); -- this is not really useful anywhere
-    --regRT: out std_logic_vector (4 downto 0);
-    --regRS: out std_logic_vector (4 downto 0);
+    regRD: out std_logic_vector (4 downto 0); -- push to after EX to write back in reg/mem
+    regRT: out std_logic_vector (4 downto 0);
+    regRS: out std_logic_vector (4 downto 0);
     --INDregRD: out natural; -- these are intermediate for element
     --INDregRT: out natural;
     --INDregRS: out natural;
@@ -149,9 +150,9 @@ architecture behavior of insDec is
   -- for WORDFORMAT
   SIGNAL wordformatin: std_logic_vector (1 downto 0) := (others => '0');
   -- for REGISTRYMANAGER
-  SIGNAL regRD: std_logic_vector (4 downto 0) := (others => '0');
-  SIGNAL regRT: std_logic_vector (4 downto 0) := (others => '0');
-  SIGNAL regRS: std_logic_vector (4 downto 0) := (others => '0');
+  --SIGNAL regRD: std_logic_vector (4 downto 0) := (others => '0');
+  --SIGNAL regRT: std_logic_vector (4 downto 0) := (others => '0');
+  --SIGNAL regRS: std_logic_vector (4 downto 0) := (others => '0');
   -- transform regRD/RT/RS to actual index that can be used (INDregRD/S/T) -- done in registryManager
   SIGNAL INDregRD: natural := 0;
   SIGNAL INDregRT: natural := 0;
@@ -169,7 +170,7 @@ architecture behavior of insDec is
     );
     OCM: opCodeManager
     PORT MAP(wordinstruction => wordinstruction, wordclass => wordclass, 
-    opCodeWord => opCodeWord, opCodeFunc => opCodeFunc, wordformat => wordformatin, shamt => shamt);
+    opCodeWord => opcode, opCodeFunc => funct, wordformat => wordformatin, shamt => shamt);
     RM: registryManager
     PORT MAP(wordinstruction => wordinstruction, wordformat => wordformatin, 
     regRD => regRD, regRT => regRT, regRS => regRT, 

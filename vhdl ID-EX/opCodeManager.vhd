@@ -57,7 +57,8 @@ architecture behavior of opCodeManager is
     -- signal assignment in one huge when/else statement (no clk cycles needed)
     opCodeConcat <= 
       -- funct usage
-      -- arith (1)
+      
+      -- arith (1)
       "00101" when (opCodeWordi = "000000") and (opCodeFunci = "100000") else
       "00101" when (opCodeWordi = "000000") and (opCodeFunci = "100010") else
       "00101" when (opCodeWordi = "000000") and (opCodeFunci = "011000") else
@@ -95,7 +96,8 @@ architecture behavior of opCodeManager is
       "10110" when (opCodeWordi = "100000") else
       "10110" when (opCodeWordi = "101011") else
       "10110" when (opCodeWordi = "101000") else
-      -- control (6)
+      
+      -- control (6)
       "11010" when (opCodeWordi = "000100") else
       "11010" when (opCodeWordi = "000101") else
       "11011" when (opCodeWordi = "000010") else

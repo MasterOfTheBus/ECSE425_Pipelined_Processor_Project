@@ -11,7 +11,8 @@ USE ieee.numeric_std.ALL;
 
 -- 5 bit index
 -- 32 general use registers total
--- 1 extra register for Program Counter (PC)
+-- 1 extra register for Program Counter (PC)? > actually it will never reach this 31max index
+-- set the PC elsewhere like REG31
 -- each reg has 16 bit unsigned int >> check for overflow in Classes of functions
 entity decoderReg is
   port(
@@ -51,7 +52,7 @@ entity decoderReg is
     regElement29Out: out std_logic_vector(31 downto 0);
     regElement30Out: out std_logic_vector(31 downto 0);
     regElement31Out: out std_logic_vector(31 downto 0);
-    regElement32Out: out std_logic_vector(31 downto 0) -- registry for PC
+    regElement32Out: out std_logic_vector(31 downto 0) -- this should always be U;
   );
 end entity;
 
