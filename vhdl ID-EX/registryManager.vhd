@@ -49,18 +49,18 @@ architecture behavior of registryManager is
     RegistryRS <= 
       wordinstruction (25 downto 21) when (FORMAT = "01") else 
       wordinstruction (25 downto 21) when (FORMAT = "10") else 
-      "00000";
+      "ZZZZZ";
       
     -- for RT
     RegistryRT <= 
       wordinstruction (20 downto 16) when (FORMAT = "01") else 
       wordinstruction (20 downto 16) when (FORMAT = "10") else 
-      "00000";  
+      "ZZZZZ";  
       
     -- for RD
     RegistryRD <= 
       wordinstruction (15 downto 11) when (FORMAT = "01") else 
-      "00000";  
+      "ZZZZZ";  
       
     -- for Immediate
     IMMEDIATEIN <= 
