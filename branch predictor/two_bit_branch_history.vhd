@@ -6,7 +6,7 @@ USE ieee.numeric_std.ALL;
 ENTITY branch_history IS 
 	PORT (
 		clk, reset 	: IN std_logic; 
-		RegWrite 	: IN std_logic;			
+		TableWrite 	: IN std_logic;			
 		
 		ReadAddr1	: IN std_logic_vector(4 DOWNTO 0); 	-- 5 LSBs
 		ReadAddr2	: IN std_logic_vector(4 DOWNTO 0); 
@@ -33,7 +33,7 @@ ARCHITECTURE behavior OF branch_history IS
 				registerfile(i) <= (OTHERS => '0'); 
 			END LOOP;
 		ELSIF rising_edge(clk) THEN 
-			IF RegWrite = '1' THEN 
+			IF TableWrite = '1' THEN 
 				registerfile(to_integer(unsigned(WriteAddr))) <= WriteData; 
 			END IF; 
 		END IF; 
