@@ -3,7 +3,7 @@ USE IEEE.std_logic_1164.ALL;
 USE ieee.std_logic_unsigned.ALL;
 USE ieee.numeric_std.ALL;
 
-ENTITY branch_history IS 
+ENTITY two_bit_branch_history IS 
 	PORT (
 		clk, reset 	: IN std_logic; 
 		TableWrite 	: IN std_logic;			
@@ -18,7 +18,7 @@ ENTITY branch_history IS
 	); 
 END ENTITY; 
 
-ARCHITECTURE behavior OF branch_history IS 
+ARCHITECTURE behavior OF two_bit_branch_history IS 
 	SUBTYPE WordT IS std_logic_vector(1 DOWNTO 0); -- reg word TYPE 
 	TYPE StorageT IS ARRAY(0 TO 31) OF WordT; -- reg array TYPE ; support 32 branches (2^5 LSBs)
 	SIGNAL registerfile : StorageT; -- reg file contents 

@@ -17,10 +17,12 @@ end two_bit_branch_predictor;
 architecture behavioral of two_bit_branch_predictor is
 
 	-- include the branch history table as a component
-	COMPONENT branch_history_table IS
+	-- remember to have all inputs written, outputs dont matter
+	COMPONENT two_bit_branch_history IS
     PORT (
 			clk, reset, TableWrite	: IN std_logic;
 			ReadAddr1		: IN std_logic_vector(4 DOWNTO 0);
+			ReadAddr2		: IN std_logic_vector(4 DOWNTO 0); -- this is needed 
 			WriteAddr   	: IN std_logic_vector(4 DOWNTO 0);
 			WriteData   	: IN std_logic_vector(1 DOWNTO 0);
 			ReadData1		: OUT std_logic_vector(1 DOWNTO 0)
@@ -30,12 +32,17 @@ architecture behavioral of two_bit_branch_predictor is
 	signal writeToTable : std_logic;
 	signal predictBits : std_logic_vector(1 downto 0);
 	
+	-- dummy signals that don't really do anything
+	SIGNAL DUMMYRA2 : std_logic_vector(4 DOWNTO 0) := (others => '0');
+	
 begin
 
-	hist_table : branch_history_table
-		PORT MAP(clk => clk, reset => reset, TableWrite => writeToTable, ReadAddr1 => branchLSB, WriteAddr => branchLSB, WriteData => updateBits, ReadData1 => predictBits);
+	hist_table : two_bit_branch_history
+		PORT MAP(clk => clk, reset => reset, TableWrite => writeToTable, 
+		ReadAddr1 => branchLSB, ReadAddr2 => DUMMYRA2, WriteAddr => branchLSB, 
+		WriteData => updateBits, ReadData1 => predictBits);
 
-comb_logic: process(enable, update, branchLSB, predictBits)
+comb_logic_enable: process(enable, branchLSB, predictBits)
 begin
 
 	if enable = '1' then
@@ -48,15 +55,28 @@ begin
 			output <= '1';
 		elsif predictBits = "11" then
 			output <= '1';
-		-- don't take/take when nothing is initialized, either is fine, we just can't have nothing happening
-		-- another way to fix this is to have reset = 1 before anything happens
-		else output <= '0';
 		end if;
-	elsif update = '1' then
-		-- update the table
-		writeToTable <= '1';
+		
+		-- When nothing is initialized, output should be UU
+		-- Normally, we dont want U as output anywhere so:
+		-- if you stop enabling, the output is 0
+	elsif enable = '0' then
+		output <= '0';	
+		
 	end if;
 
+end process;
+
+comb_logic_update: process(update, branchLSB, predictBits)
+begin
+  if update = '1' then
+		-- update the table
+		writeToTable <= '1';
+		
+	elsif update = '0' then
+	  -- stop updating, remember that signals will keep their last value
+	  writeToTable <= '0';
+	end if;
 end process;
 
 end behavioral;

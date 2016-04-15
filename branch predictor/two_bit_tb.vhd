@@ -10,7 +10,7 @@ COMPONENT two_bit_branch_predictor IS
 port (clk : in std_logic;
       reset : in std_logic;
       branchLSB : in std_logic_vector(4 downto 0); -- "where" the branch is
-	    updateBits : in std_logic_vector(1 downto 0); -- "what" the branch is
+	    updateBits : in std_logic_vector(1 downto 0); -- "what" the branch is (write only)
 	    enable : in std_logic; -- read
 	    update : in std_logic; -- write
       output : out std_logic -- Taken?/Not Taken?
@@ -60,10 +60,14 @@ BEGIN
 	--REPORT "_______________________";
 	
 	-- A sequence to test writing and reading from the branch history
+	REPORT "Wait a bit before reset";
+	wait for 1 * clk_period;
+	
 	REPORT "reset everything";
 	s_reset <= '1';
 	wait for 1 * clk_period;
 	s_reset <= '0';
+	wait for 1 * clk_period;
 	
 	REPORT "read";
 	--s_TableWrite <= '0';
@@ -83,14 +87,39 @@ BEGIN
 	--s_WriteData <= "10";
 	wait for 1 * clk_period;
 	
+  REPORT "Wait for extra clk cycle";
+	s_enable <= '0';
+	s_update <= '0';
+	wait for 1 * clk_period;
+	
+	REPORT "Wait for extra clk cycle";
+	s_enable <= '1';
+	s_update <= '0';
+	wait for 1 * clk_period;
+	
 	REPORT "read";
 	--s_TableWrite <= '0';
 	s_enable <= '1';
 	s_update <= '0';
 	s_branchLSB <= "10110";
-	wait for 1 * clk_period;
-	assert (s_output = '0') REPORT "Initial is taken when it should be not taken";
+	assert (s_output = '1') REPORT "After writing 10 as state, the branch should be taken";
 	
+	s_enable <= '0';
+	wait for 1 * clk_period;
+	
+	REPORT "read";
+	--s_TableWrite <= '0';
+	s_enable <= '1';
+	s_update <= '0';
+	s_branchLSB <= "10010";
+	wait for 1 * clk_period;
+	
+	s_enable <= '0';
+	s_updateBits <= "01";
+	wait for 1 * clk_period;
+	s_enable <= '0';
+	s_updateBits <= "11";
+	wait for 1 * clk_period;
 	
 	WAIT;
 END PROCESS stim_process;
